@@ -184,7 +184,11 @@ const FarmerChatbotMock = ({ setView }) => {
             const response = await axios.post(`${API_BASE_URL}/api/farmer/register`, {
                 ...farmerData,
                 land_size: 5.0 // Hardcode land size for simplicity
-            });
+            }, {
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }); 
             const newId = response.data.farmer_id;
             setFarmerId(newId);
             setFlowState('READY');
