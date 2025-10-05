@@ -1,0 +1,131 @@
+/* src/App.css */
+
+.App {
+  text-align: center;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+/* Base styles for the demo UI elements */
+.welcome-container, .dashboard-list-container, .chatbot-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Button styles */
+button, .btn-report {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-farmer { background-color: #6aaa44; color: white; } /* Green */
+.btn-lender { background-color: #007bff; color: white; } /* Blue */
+.btn-approve { background-color: #ffc107; color: black; } /* Yellow */
+.btn-report { background-color: #dc3545; color: white; } /* Red */
+
+/* Chat styles */
+.chat-window {
+    height: 400px;
+    border: 1px solid #eee;
+    overflow-y: scroll;
+    padding: 15px;
+    background: #f9f9f9;
+    margin-bottom: 15px;
+    text-align: left;
+    white-space: pre-wrap;
+}
+
+.message-row {
+    margin-bottom: 10px;
+    overflow: auto; /* Clear floats */
+}
+
+.message-bubble {
+    padding: 8px 12px;
+    border-radius: 15px;
+    display: inline-block;
+    max-width: 70%;
+    position: relative;
+    font-size: 0.9em;
+}
+
+.bot .message-bubble {
+    background-color: #e2ffc7; /* WhatsApp Green */
+    float: left;
+}
+
+.user .message-bubble {
+    background-color: #fff; 
+    border: 1px solid #ccc;
+    float: right;
+}
+
+.timestamp {
+    display: block;
+    font-size: 0.7em;
+    color: #888;
+    margin-top: 2px;
+}
+
+.chat-input-form {
+    display: flex;
+}
+
+.chat-input-form input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+}
+
+.chat-input-form button {
+    border-radius: 0 5px 5px 0;
+    background-color: #007bff;
+    color: white;
+}
+
+/* Lender Dashboard Styles */
+.farmer-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Stage Tracker Styles */
+.tracker-box {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+.stage-item {
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f7f7f7;
+}
+
+.stage-completed { border-left: 5px solid green; }
+.stage-unlocked { border-left: 5px solid orange; }
+.stage-locked { border-left: 5px solid red; }
+
+.stage-name { flex-grow: 1; text-align: left; margin-left: 10px;}
+.stage-disbursement { font-weight: bold; margin-right: 15px;}
