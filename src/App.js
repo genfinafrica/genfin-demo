@@ -4,7 +4,6 @@ import axios from 'axios';
 import './App.css'; // You'll need to create a simple CSS file
 
 // --- Configuration ---
-// The URL is read from the environment variable (Vercel injection)
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 // --- Helper Components ---
@@ -33,19 +32,18 @@ const StageTracker = ({ farmerId, stages, name, phone, totalDisbursed, onApprova
         <p><strong>Phone:</strong> {phone} | <strong>Total Disbursed (Mock):</strong> ${totalDisbursed.toFixed(2)}</p>
         
         {stages.map(stage => (
-            <div key={stage.number} className={`stage-item stage-${stage.status.toLowerCase()}`}>
+            <div key={stage.stage_number} className={`stage-item stage-${stage.status.toLowerCase()}`}>
                 <span className="stage-icon">{
                     stage.status === 'COMPLETED' ? '✅' :
                     stage.status === 'UNLOCKED' ? '🔓' : '🔒'
                 }</span>
-                <span className="stage-name">Stage {stage.number}: {stage.name}</span>
-                <span className="stage-disbursement">(${stage.disbursement_mock.toFixed(2)})</span>
+                <span className="stage-name">Stage {stage.stage_number}: {stage.stage_name}</span>
+                <span className="stage-disbursement">(${stage.disbursement_amount.toFixed(2)})</span>
                 
-                {/* Lender Action: Show Approve button ONLY if stage is UNLOCKED */}
                 {stage.status === 'UNLOCKED' && (
                     <button 
                         className="btn-approve" 
-                        onClick={() => onApproval(farmerId, stage.number)}>
+                        onClick={() => onApproval(farmerId, stage.stage_number)}>
                         Approve Stage
                     </button>
                 )}
@@ -53,7 +51,7 @@ const StageTracker = ({ farmerId, stages, name, phone, totalDisbursed, onApprova
         ))}
 
         <a 
-            href={`${API_BASE_URL}/report/${farmerId}`} 
+            href={`${API_BASE_URL}/api/report/farmer/${farmerId}`} 
             target="_blank" 
             rel="noopener noreferrer"
             className="btn-report"
@@ -63,7 +61,6 @@ const StageTracker = ({ farmerId, stages, name, phone, totalDisbursed, onApprova
     </div>
 );
 
-
 // --- Lender Dashboard Implementation ---
 const LenderDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
@@ -72,34 +69,35 @@ const LenderDashboard = ({ setView }) => {
     // 1. Fetch the list of all farmers
     const fetchFarmers = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/farmers/list`);
+            const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
             setFarmers(response.data);
             setSelectedFarmer(null); // Clear detail view
         } catch (error) {
             console.error("Failed to fetch farmer list:", error);
+            alert("Failed to fetch farmers. Please try again.");
         }
     };
     
     // 2. Fetch details for a single farmer
     const fetchFarmerDetails = async (id) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/farmer/status/${id}`);
+            const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
             setSelectedFarmer(response.data);
         } catch (error) {
             console.error("Failed to fetch farmer details:", error);
+            alert("Failed to fetch farmer details. Please try again.");
         }
     };
 
     // 3. Approval action (Lender/Admin)
     const handleApproval = async (farmerId, stageNumber) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/stage/approve/${farmerId}/${stageNumber}`);
+            const response = await axios.post(`${API_BASE_URL}/api/farmer/${farmerId}/trigger`);
             alert(`SUCCESS: ${response.data.message}`);
-            // After successful approval, re-fetch details to update UI
             fetchFarmerDetails(farmerId); 
-            fetchFarmers(); // Refresh the list summary
+            fetchFarmers();
         } catch (error) {
-            alert(`Approval Failed: ${error.response.data.message}`);
+            alert(`Approval Failed: ${error.response?.data?.message || 'Server error'}`);
         }
     };
 
@@ -114,11 +112,11 @@ const LenderDashboard = ({ setView }) => {
             <div className="dashboard-detail">
                 <button onClick={() => setSelectedFarmer(null)} className="btn-back">← Back to List</button>
                 <StageTracker
-                    farmerId={selectedFarmer.farmer.id}
+                    farmerId={selectedFarmer.farmer_id}
                     stages={selectedFarmer.stages}
-                    name={selectedFarmer.farmer.name}
-                    phone={selectedFarmer.farmer.phone}
-                    totalDisbursed={selectedFarmer.total_disbursed}
+                    name={selectedFarmer.name}
+                    phone={selectedFarmer.phone}
+                    totalDisbursed={selectedFarmer.current_status.total_disbursed}
                     onApproval={handleApproval}
                 />
             </div>
@@ -138,7 +136,7 @@ const LenderDashboard = ({ setView }) => {
                     farmers.map(farmer => (
                         <div key={farmer.id} className="farmer-card">
                             <h3>{farmer.name}</h3>
-                            <p>ID: {farmer.id} | Progress: {farmer.progress}</p>
+                            <p>ID: {farmer.id} | Progress: {farmer.stages_completed}</p>
                             <button onClick={() => fetchFarmerDetails(farmer.id)}>View Details</button>
                         </div>
                     ))
@@ -150,11 +148,9 @@ const LenderDashboard = ({ setView }) => {
 
 // --- Farmer Chatbot Mock Implementation ---
 const FarmerChatbotMock = ({ setView }) => {
-    // This component will handle registration and stage triggering 
-    // to mock the user interaction from the BRS.
     const [chatHistory, setChatHistory] = useState([]);
     const [input, setInput] = useState('');
-    const [flowState, setFlowState] = useState('INTRO'); // INTRO, REGISTER_NAME, REGISTER_PHONE, REGISTER_CROP, READY, GET_ID
+    const [flowState, setFlowState] = useState('INTRO');
     const [farmerData, setFarmerData] = useState({});
     const [farmerId, setFarmerId] = useState(null);
 
@@ -163,7 +159,6 @@ const FarmerChatbotMock = ({ setView }) => {
 
     const addMessage = (sender, text) => {
         setChatHistory(prev => [...prev, { sender, text, time: new Date() }]);
-        // Scroll to bottom functionality would be implemented here in a real chat box
     };
 
     const startFlow = () => {
@@ -177,84 +172,72 @@ const FarmerChatbotMock = ({ setView }) => {
         startFlow();
     }, []);
 
-    // Function to handle farmer registration API call
     const handleRegistration = async () => {
         addMessage('BOT', "Submitting registration...");
         try {
             const response = await axios.post(`${API_BASE_URL}/api/farmer/register`, {
-                ...farmerData,
-                land_size: 5.0 // Hardcode land size for simplicity
+                ...farmerData
             }, {
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            }); 
+                headers: { 'Content-Type': 'application/json' }
+            });
             const newId = response.data.farmer_id;
             setFarmerId(newId);
             setFlowState('READY');
             addMessage('BOT', `✅ Success! You are registered. Your ID is ${newId}. Stage 1 (Soil Test) is UNLOCKED.`);
             addMessage('BOT', `Type 'TRIGGER' to submit a stage milestone or 'STATUS' to check progress.`);
         } catch (error) {
-            addMessage('BOT', `❌ Registration failed: ${error.response.data.message}`);
-            setFlowState('INTRO'); // Go back to start
+            addMessage('BOT', `❌ Registration failed: ${error.response?.data?.message || 'Server error'}`);
+            setFlowState('INTRO');
         }
-        setFarmerData({}); // Clear buffer
+        setFarmerData({});
     };
 
-    // Function to handle stage triggering API call
     const handleTrigger = async () => {
-        // First, check what the UNLOCKED stage is
-        const statusResponse = await axios.get(`${API_BASE_URL}/api/farmer/status/${farmerId}`);
-        const nextStage = statusResponse.data.stages.find(s => s.status === 'UNLOCKED');
-
-        if (!nextStage) {
-            addMessage('BOT', "No stages are currently UNLOCKED. You must wait for Admin approval!");
-            return;
-        }
-
-        addMessage('BOT', `Received confirmation for Stage ${nextStage.number} (${nextStage.name}). Submitting to Field Officer for review...`);
-
         try {
-            // Note: For this mock, the farmer triggering immediately results in approval (simulating rapid admin action)
-            const approvalResponse = await axios.post(`${API_BASE_URL}/api/stage/approve/${farmerId}/${nextStage.number}`);
-            
+            const statusResponse = await axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`);
+            const nextStage = statusResponse.data.stages.find(s => s.status === 'UNLOCKED');
+
+            if (!nextStage) {
+                addMessage('BOT', "No stages are currently UNLOCKED. You must wait for Admin approval!");
+                return;
+            }
+
+            addMessage('BOT', `Received confirmation for Stage ${nextStage.stage_number} (${nextStage.stage_name}). Submitting to Field Officer for review...`);
+
+            const approvalResponse = await axios.post(`${API_BASE_URL}/api/farmer/${farmerId}/trigger`);
             addMessage('BOT', `🎉 SUCCESS: ${approvalResponse.data.message}`);
             addMessage('BOT', `Type 'TRIGGER' for the next step or 'STATUS' to check progress.`);
         } catch (error) {
-            addMessage('BOT', `❌ Trigger Failed: ${error.response.data.message}`);
-        }
-    };
-    
-    // Function to handle status check API call
-    const handleStatus = async () => {
-        try {
-            const statusResponse = await axios.get(`${API_BASE_URL}/api/farmer/status/${farmerId}`);
-            const stagesText = statusResponse.data.stages.map(s => 
-                `${s.status === 'COMPLETED' ? '✅' : s.status === 'UNLOCKED' ? '🔓' : '🔒'} Stage ${s.number}: ${s.name} - ${s.status}`).join('\n');
-            
-            addMessage('BOT', `--- YOUR STATUS ---\n${stagesText}\nTotal Disbursed: $${statusResponse.data.total_disbursed.toFixed(2)}`);
-        } catch (error) {
-             addMessage('BOT', `❌ Failed to fetch status. Are you sure your ID is correct?`);
+            addMessage('BOT', `❌ Trigger Failed: ${error.response?.data?.message || 'Server error'}`);
         }
     };
 
-    // Main input handler (The Chatbot Brain)
+    const handleStatus = async () => {
+        try {
+            const statusResponse = await axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`);
+            const stagesText = statusResponse.data.stages.map(s =>
+                `${s.status === 'COMPLETED' ? '✅' : s.status === 'UNLOCKED' ? '🔓' : '🔒'} Stage ${s.stage_number}: ${s.stage_name} - ${s.status}`).join('\n');
+            addMessage('BOT', `--- YOUR STATUS ---\n${stagesText}\nTotal Disbursed: $${statusResponse.data.current_status.total_disbursed.toFixed(2)}`);
+        } catch (error) {
+            addMessage('BOT', `❌ Failed to fetch status. Are you sure your ID is correct?`);
+        }
+    };
+
     const handleInput = (e) => {
         e.preventDefault();
         const text = input.trim();
         if (!text) return;
-        
+
         addMessage('USER', text);
         setInput('');
 
-        // Logic based on flowState
         if (flowState === 'INTRO') {
             if (text.toUpperCase() === 'REGISTER') {
                 botMessage("What is your full name?");
                 setFlowState('REGISTER_NAME');
             } else if (text.toUpperCase() === 'STATUS') {
-                 botMessage("Please enter your Farmer ID.");
-                 setFlowState('GET_ID');
+                botMessage("Please enter your Farmer ID.");
+                setFlowState('GET_ID');
             } else {
                 botMessage("Please type 'REGISTER' or 'STATUS'.");
             }
@@ -266,7 +249,7 @@ const FarmerChatbotMock = ({ setView }) => {
                 handleStatus();
                 botMessage("Type 'TRIGGER' for the next step or 'STATUS' to check progress.");
             } else {
-                 botMessage("Invalid ID. Please enter a number.");
+                botMessage("Invalid ID. Please enter a number.");
             }
         } else if (flowState === 'REGISTER_NAME') {
             setFarmerData(prev => ({ ...prev, name: text }));
@@ -278,7 +261,16 @@ const FarmerChatbotMock = ({ setView }) => {
             setFlowState('REGISTER_CROP');
         } else if (flowState === 'REGISTER_CROP') {
             setFarmerData(prev => ({ ...prev, crop: text }));
-            handleRegistration(); // Final step of registration
+            botMessage("What is your land size in acres?");
+            setFlowState('REGISTER_LAND_SIZE');
+        } else if (flowState === 'REGISTER_LAND_SIZE') {
+            const landSize = parseFloat(text);
+            if (isNaN(landSize) || landSize < 0) {
+                botMessage("Invalid land size. Please enter a non-negative number.");
+            } else {
+                setFarmerData(prev => ({ ...prev, land_size: landSize }));
+                handleRegistration();
+            }
         } else if (flowState === 'READY') {
             if (text.toUpperCase() === 'TRIGGER') {
                 handleTrigger();
@@ -289,7 +281,6 @@ const FarmerChatbotMock = ({ setView }) => {
             }
         }
     };
-
 
     return (
         <div className="chatbot-container">
@@ -306,7 +297,6 @@ const FarmerChatbotMock = ({ setView }) => {
                         </div>
                     </div>
                 ))}
-                {/* Scroll to bottom element would go here */}
             </div>
             <form onSubmit={handleInput} className="chat-input-form">
                 <input 
@@ -322,10 +312,9 @@ const FarmerChatbotMock = ({ setView }) => {
     );
 };
 
-
 // --- Main App Component ---
 function App() {
-    const [view, setView] = useState('welcome'); // welcome, farmer, or lender
+    const [view, setView] = useState('welcome');
 
     const renderView = () => {
         switch (view) {
@@ -347,4 +336,3 @@ function App() {
 }
 
 export default App;
-  
