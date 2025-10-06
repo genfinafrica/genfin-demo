@@ -519,7 +519,8 @@ const FarmerChatbotMock = ({ setView }) => {
                 />
                 <button type="submit">Send</button>
             </form>
-            <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>
+            <p className="disclaimer">For Demonstration Only. Powered by <a **href**="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>
+                        
         </div>
     );
 };
