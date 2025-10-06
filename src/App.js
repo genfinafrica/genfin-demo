@@ -8,8 +8,8 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
 
 const WelcomeScreen = ({ setView }) => (
     <div className="welcome-container">
-        <h1>GENFIN 🌱 AFRICA</h1>
-        <h2>G20 TechSprint 2025 Demo</h2>
+        <h2>GENFIN 🌱 AFRICA</h2>
+        <p><b>G20 TechSprint 2025 Demo</b></p>
         <p>Select a user role to begin the stage-based financing flow demonstration.</p>
         <div className="role-buttons">
             <button className="btn-farmer" onClick={() => setView('farmer')}>
