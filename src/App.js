@@ -492,21 +492,20 @@ const FarmerChatbotMock = ({ setView }) => {
                 <button onClick={() => setView('welcome')} className="btn-back">← Role Selection</button>
                 <h2>WhatsApp Chatbot Mock</h2>
             </div>
-            <div className="chat-window" ref={chatWindowRef}>
+            <div className="chat-window">
                 {chatHistory.map((msg, index) => (
                     <div key={index} className={`message-row ${msg.sender.toLowerCase()}`}>
                         <div className="message-bubble">
-                            <span className="sender-icon">{msg.sender === 'BOT' ? '🤖' : '🧑‍🌾'}</span>
-                            <div className="message-content">
-                                {msg.text.split('\n').map((line, i) => <p key={i}>{line}</p>)}
-                                <span className="timestamp">{msg.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
+                            {msg.sender === 'BOT' ? '🤖' : '🧑‍🌾'} {msg.text}
+                            <span className="timestamp">{msg.time.toLocaleTimeString()}</span>
                         </div>
                     </div>
                 ))}
             </div>
             {showMockFileInput && (
                 <div className="mock-file-input">
+                    <label htmlFor="mock-file">Select File (Mock)</label>
+                    <input type="file" id="mock-file" disabled />
                     <span>Type the file name in the chat input below.</span>
                 </div>
             )}
@@ -516,10 +515,10 @@ const FarmerChatbotMock = ({ setView }) => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type your message..."
-                    autoFocus
                 />
                 <button type="submit">Send</button>
             </form>
+            <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>
         </div>
     );
 };
