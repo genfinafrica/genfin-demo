@@ -180,3 +180,8 @@ button:hover,
   font-size: 0.9em;
   color: #555;
 }
+.esusfarm-logo {
+    max-width: 90%; /* Adjust size to fit the card */
+    height: auto;
+    margin-bottom: 15px; /* Space between the logo and the text below it */
+}
