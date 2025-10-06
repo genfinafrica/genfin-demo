@@ -24,15 +24,15 @@ const WelcomeScreen = ({ setView }) => (
                 Field Officer Dashboard
             </button>
         </div>
-        <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>
+        <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>  // Updated: Disclaimer
     </div>
 );
 
 // Component 2: Displays the stage data for a single farmer
-const StageTracker = ({ farmerId, stages, uploads, name, phone, totalDisbursed, score, onApproval }) => (
+const StageTracker = ({ farmerId, stages, uploads, name, phone, totalDisbursed, score, onApproval }) => (  // Updated: Added uploads, score
     <div className="tracker-box">
         <h2>{name}'s Loan Status</h2>
-        <p><strong>Phone:</strong> {phone} | <strong>Total Disbursed (Mock):</strong> ${totalDisbursed.toFixed(2)} | <strong>Score:</strong> {score}</p>
+        <p><strong>Phone:</strong> {phone} | <strong>Total Disbursed (Mock):</strong> ${totalDisbursed.toFixed(2)} | <strong>Score:</strong> {score}</p>  // Updated: Added score
         
         {stages.map(stage => (
             <div key={stage.stage_number} className={`stage-item stage-${stage.status.toLowerCase()}`}>
@@ -42,7 +42,7 @@ const StageTracker = ({ farmerId, stages, uploads, name, phone, totalDisbursed, 
                 }</span>
                 <span className="stage-name">Stage {stage.stage_number}: {stage.stage_name}</span>
                 <span className="stage-disbursement">(${stage.disbursement_amount.toFixed(2)})</span>
-                <span className="stage-uploads">
+                <span className="stage-uploads">  // New: Display uploads
                     Uploads: {uploads.filter(u => u.stage_number === stage.stage_number).map(u => u.file_type).join(', ') || 'None'}
                 </span>
                 {stage.status === 'UNLOCKED' && (
@@ -84,11 +84,13 @@ const LenderDashboard = ({ setView }) => {
     
     const fetchFarmerDetails = async (id) => {
         try {
+            console.log(`Fetching details for farmer ID: ${id}`); // New: Debug logging
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
+            console.log(`Farmer details response:`, response.data); // New: Debug logging
             setSelectedFarmer(response.data);
         } catch (error) {
-            console.error("Failed to fetch farmer details:", error);
-            alert("Failed to fetch farmer details. Please try again.");
+            console.error(`Failed to fetch farmer details for ID ${id}:`, error);
+            alert(`Failed to fetch farmer details: ${error.response?.data?.message || 'Server error'}`);
         }
     };
 
@@ -114,11 +116,11 @@ const LenderDashboard = ({ setView }) => {
                 <StageTracker
                     farmerId={selectedFarmer.farmer_id}
                     stages={selectedFarmer.stages}
-                    uploads={selectedFarmer.uploads}
+                    uploads={selectedFarmer.uploads}  // New: Pass uploads
                     name={selectedFarmer.name}
                     phone={selectedFarmer.phone}
                     totalDisbursed={selectedFarmer.current_status.total_disbursed}
-                    score={selectedFarmer.current_status.score}
+                    score={selectedFarmer.current_status.score}  // New: Pass score
                     onApproval={handleApproval}
                 />
             </div>
@@ -137,7 +139,7 @@ const LenderDashboard = ({ setView }) => {
                     farmers.map(farmer => (
                         <div key={farmer.id} className="farmer-card">
                             <h3>{farmer.name}</h3>
-                            <p>ID: {farmer.id} | Progress: {farmer.stages_completed} | Score: {farmer.score}</p>
+                            <p>ID: {farmer.id} | Progress: {farmer.stages_completed} | Score: {farmer.score}</p>  // Updated: Added score
                             <button onClick={() => fetchFarmerDetails(farmer.id)}>View Details</button>
                         </div>
                     ))
@@ -147,29 +149,35 @@ const LenderDashboard = ({ setView }) => {
     );
 };
 
-// --- Field Officer Dashboard Implementation ---
+// New: Field Officer Dashboard
 const FieldOfficerDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmer, setSelectedFarmer] = useState(null);
+    const [error, setError] = useState(null); // New: Error handling
 
     const fetchFarmers = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
+            console.log("Field Officer: Fetched farmers:", response.data); // New: Debug logging
             setFarmers(response.data);
             setSelectedFarmer(null);
+            setError(null);
         } catch (error) {
-            console.error("Failed to fetch farmer list:", error);
-            alert("Failed to fetch farmers. Please try again.");
+            console.error("Field Officer: Failed to fetch farmer list:", error);
+            setError(`Failed to fetch farmers: ${error.response?.data?.message || 'Server error'}`);
         }
     };
     
     const fetchFarmerDetails = async (id) => {
         try {
+            console.log(`Field Officer: Fetching details for farmer ID: ${id}`); // New: Debug logging
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
+            console.log(`Field Officer: Farmer details response:`, response.data); // New: Debug logging
             setSelectedFarmer(response.data);
+            setError(null);
         } catch (error) {
-            console.error("Failed to fetch farmer details:", error);
-            alert("Failed to fetch farmer details. Please try again.");
+            console.error(`Field Officer: Failed to fetch farmer details for ID ${id}:`, error);
+            setError(`Failed to fetch farmer details: ${error.response?.data?.message || 'Server error'}`);
         }
     };
 
@@ -211,6 +219,7 @@ const FieldOfficerDashboard = ({ setView }) => {
             <button onClick={() => setView('welcome')} className="btn-back">← Role Selection</button>
             <h1>Field Officer Dashboard</h1>
             <p>Review uploads and approve stage-based milestones. <button onClick={fetchFarmers}>Refresh</button></p>
+            {error && <p className="error">{error}</p>}  // New: Display errors
             <div className="farmer-list">
                 {farmers.length === 0 ? (
                     <p>No farmers registered. Use the Farmer Mock-up to register one!</p>
@@ -244,7 +253,7 @@ const FarmerChatbotMock = ({ setView }) => {
     const startFlow = () => {
         setChatHistory([]);
         setFarmerId(null);
-        botMessage("Welcome to the GENFIN-AFRICA demo chat (For Demonstration Only)! Type 'REGISTER' or 'STATUS'.");
+        botMessage("Welcome to the GENFIN-AFRICA demo chat (For Demonstration Only)! Type 'REGISTER' or 'STATUS'.");  // Updated: Disclaimer
         setFlowState('INTRO');
     };
 
@@ -253,11 +262,16 @@ const FarmerChatbotMock = ({ setView }) => {
     }, []);
 
     const handleRegistration = async () => {
+        const payload = {
+            name: farmerData.name,
+            phone: farmerData.phone,
+            crop: farmerData.crop,
+            land_size: Number(farmerData.land_size)  // New: Ensure land_size is a number
+        };
+        console.log("Sending registration payload:", payload);  // New: Debug logging
         addMessage('BOT', "Submitting registration...");
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/farmer/register`, {
-                ...farmerData
-            }, {
+            const response = await axios.post(`${API_BASE_URL}/api/farmer/register`, payload, {
                 headers: { 'Content-Type': 'application/json' }
             });
             const newId = response.data.farmer_id;
@@ -266,12 +280,14 @@ const FarmerChatbotMock = ({ setView }) => {
             addMessage('BOT', `✅ Success! You are registered. Your ID is ${newId}. Stage 1 (Soil Test) is UNLOCKED.`);
             addMessage('BOT', `Please upload a soil test file for Stage 1. Type 'UPLOAD'.`);
         } catch (error) {
+            console.error("Registration error:", error.response?.data);  // New: Debug logging
             addMessage('BOT', `❌ Registration failed: ${error.response?.data?.message || 'Server error'}`);
             setFlowState('INTRO');
         }
         setFarmerData({});
     };
 
+    // New: Handle file uploads
     const handleUpload = async (stageNumber, fileType, fileName) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/api/farmer/${farmerId}/upload`, {
@@ -328,7 +344,7 @@ const FarmerChatbotMock = ({ setView }) => {
                 `${s.status === 'COMPLETED' ? '✅' : s.status === 'UNLOCKED' ? '🔓' : '🔒'} Stage ${s.stage_number}: ${s.stage_name} - ${s.status}`).join('\n');
             const uploadsText = statusResponse.data.uploads.map(u =>
                 `Stage ${u.stage_number}: ${u.file_type} (${u.file_name})`).join('\n') || 'None';
-            addMessage('BOT', `--- YOUR STATUS ---\nScore: ${statusResponse.data.current_status.score}\n${stagesText}\nTotal Disbursed: $${statusResponse.data.current_status.total_disbursed.toFixed(2)}\nUploads:\n${uploadsText}`);
+            addMessage('BOT', `--- YOUR STATUS ---\nScore: ${statusResponse.data.current_status.score}\n${stagesText}\nTotal Disbursed: $${statusResponse.data.current_status.total_disbursed.toFixed(2)}\nUploads:\n${uploadsText}`);  // Updated: Added score, uploads
         } catch (error) {
             addMessage('BOT', `❌ Failed to fetch status. Are you sure your ID is correct?`);
         }
@@ -380,11 +396,12 @@ const FarmerChatbotMock = ({ setView }) => {
                 botMessage("Invalid land size. Please enter a non-negative number.");
             } else {
                 setFarmerData(prev => ({ ...prev, land_size: landSize }));
+                console.log("Farmer data before registration:", { ...farmerData, land_size: landSize });  // New: Debug logging
                 handleRegistration();
             }
         } else if (flowState === 'UPLOAD') {
             if (text.toUpperCase() === 'UPLOAD') {
-                const statusResponse = axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`).then(res => {
+                axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`).then(res => {
                     const nextStage = res.data.stages.find(s => s.status === 'UNLOCKED');
                     if (!nextStage) {
                         addMessage('BOT', "No stages are currently UNLOCKED for upload.");
@@ -410,9 +427,11 @@ const FarmerChatbotMock = ({ setView }) => {
         } else if (flowState === 'UPLOAD_SOIL_TEST') {
             handleUpload(1, 'soil_test', text);
         } else if (flowState === 'UPLOAD_PHOTO') {
-            const statusResponse = axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`).then(res => {
+            axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`).then(res => {
                 const nextStage = res.data.stages.find(s => s.status === 'UNLOCKED');
                 handleUpload(nextStage.stage_number, 'photo_evidence', text);
+            }).catch(error => {
+                addMessage('BOT', `❌ Failed to check status: ${error.response?.data?.message || 'Server error'}`);
             });
         } else if (flowState === 'READY') {
             if (text.toUpperCase() === 'TRIGGER') {
@@ -420,7 +439,7 @@ const FarmerChatbotMock = ({ setView }) => {
             } else if (text.toUpperCase() === 'STATUS') {
                 handleStatus();
             } else if (text.toUpperCase() === 'UPLOAD') {
-                const statusResponse = axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`).then(res => {
+                axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`).then(res => {
                     const nextStage = res.data.stages.find(s => s.status === 'UNLOCKED');
                     if (!nextStage) {
                         addMessage('BOT', "No stages are currently UNLOCKED for upload.");
@@ -484,7 +503,7 @@ function App() {
                 return <FarmerChatbotMock setView={setView} />;
             case 'lender':
                 return <LenderDashboard setView={setView} />;
-            case 'fieldOfficer':
+            case 'fieldOfficer':  // New: Field officer view
                 return <FieldOfficerDashboard setView={setView} />;
             case 'welcome':
             default:
