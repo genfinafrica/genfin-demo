@@ -6,8 +6,18 @@ import './App.css';
 // Ensure this matches the URL where your Flask backend is running
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
 
+// This is the file ID from your Google Drive link: 1JWvtX4b24wt5vRGmhYsUW029NS0grXOq
+const LOGO_SRC = "https://drive.google.com/uc?export=view&id=1JWvtX4b24wt5vRGmhYsUW029NS0grXOq";
+
 const WelcomeScreen = ({ setView }) => (
     <div className="welcome-container">
+        {/* LOGO ELEMENT */}
+        <img 
+            src={LOGO_SRC} 
+            alt="eSusFarm Africa Logo" 
+            className="esusfarm-logo" 
+        />
+        
         <h2>GENFIN 🌱 AFRICA</h2>
         <p><b>G20 TechSprint 2025 Demo</b></p>
         <p>Select a user role to begin the stage-based financing flow demonstration.</p>
@@ -22,9 +32,10 @@ const WelcomeScreen = ({ setView }) => (
                 Field Officer Dashboard
             </button>
         </div>
-       <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>             
+        <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>
     </div>
 );
+                    
 
 const StageTracker = ({ farmerId, stages, uploads = [], name, phone, totalDisbursed, score, onApproval, onDisburse }) => (
     <div className="tracker-box">
