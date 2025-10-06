@@ -24,7 +24,7 @@ const WelcomeScreen = ({ setView }) => (
                 Field Officer Dashboard
             </button>
         </div>
-        <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>  // Updated: Disclaimer
+        <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>  
     </div>
 );
 
