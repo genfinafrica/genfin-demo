@@ -24,7 +24,7 @@ const WelcomeScreen = ({ setView }) => (
                 Field Officer Dashboard
             </button>
         </div>
-        <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>
+        <p className="disclaimer">For Demonstration Only. Backend hosted securely on PythonAnywhere.</p>
     </div>
 );
 
@@ -440,5 +440,63 @@ const FarmerChatbotMock = ({ setView }) => {
                 });
             } else {
                 botMessage("Type 'TRIGGER', 'STATUS', or 'UPLOAD'.");
-                  }
-          
+            }
+        }
+    };
+
+    return (
+        <div className="chatbot-container">
+            <div className="chat-header">
+                <button onClick={() => setView('welcome')} className="btn-back">← Role Selection</button>
+                <h2>WhatsApp Chatbot Mock</h2>
+            </div>
+            <div className="chat-window">
+                {chatHistory.map((msg, index) => (
+                    <div key={index} className={`message-row ${msg.sender.toLowerCase()}`}>
+                        <div className="message-bubble">
+                            {msg.sender === 'BOT' ? '🤖' : '🧑‍🌾'} {msg.text}
+                            <span className="timestamp">{msg.time.toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <form onSubmit={handleInput} className="chat-input-form">
+                <input 
+                    type="text" 
+                    value={input} 
+                    onChange={(e) => setInput(e.target.value)} 
+                    placeholder="Type your message..." 
+                    disabled={!flowState}
+                />
+                <button type="submit" disabled={!flowState}>Send</button>
+            </form>
+        </div>
+    );
+};
+
+// --- Main App Component ---
+function App() {
+    const [view, setView] = useState('welcome');
+
+    const renderView = () => {
+        switch (view) {
+            case 'farmer':
+                return <FarmerChatbotMock setView={setView} />;
+            case 'lender':
+                return <LenderDashboard setView={setView} />;
+            case 'fieldOfficer':
+                return <FieldOfficerDashboard setView={setView} />;
+            case 'welcome':
+            default:
+                return <WelcomeScreen setView={setView} />;
+        }
+    };
+
+    return (
+        <div className="App">
+            {renderView()}
+        </div>
+    );
+}
+
+export default App;
