@@ -7,7 +7,7 @@ import './App.css';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
 
 // This is the file ID from your Google Drive link: 1JWvtX4b24wt5vRGmhYsUW029NS0grXOq
-const LOGO_SRC = "https://drive.google.com/uc?export=view&id=1JWvtX4b24wt5vRGmhYsUW029NS0grXOq";
+const LOGO_SRC = "https://lh3.googleusercontent.com/d/1JWvtX4b24wt5vRGmhYsUW029NS0grXOq";
 
 const WelcomeScreen = ({ setView }) => (
     <div className="welcome-container">
