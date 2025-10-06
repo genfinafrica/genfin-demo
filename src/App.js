@@ -3,12 +3,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// --- Configuration ---
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
-// --- Helper Components ---
-
-// Component 1: The unified landing page
 const WelcomeScreen = ({ setView }) => (
     <div className="welcome-container">
         <h1>🌱 GENFIN-AFRICA Demo System</h1>
@@ -24,15 +20,14 @@ const WelcomeScreen = ({ setView }) => (
                 Field Officer Dashboard
             </button>
         </div>
-        <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>  
+        <p className="disclaimer">For Demonstration Only. Backend hosted securely on PythonAnywhere.</p>
     </div>
 );
 
-// Component 2: Displays the stage data for a single farmer
-const StageTracker = ({ farmerId, stages, uploads, name, phone, totalDisbursed, score, onApproval }) => (  // Updated: Added uploads, score
+const StageTracker = ({ farmerId, stages, uploads = [], name, phone, totalDisbursed, score, onApproval }) => (
     <div className="tracker-box">
         <h2>{name}'s Loan Status</h2>
-        <p><strong>Phone:</strong> {phone} | <strong>Total Disbursed (Mock):</strong> ${totalDisbursed.toFixed(2)} | <strong>Score:</strong> {score}</p>  // Updated: Added score
+        <p><strong>Phone:</strong> {phone} | <strong>Total Disbursed (Mock):</strong> ${totalDisbursed.toFixed(2)} | <strong>Score:</strong> {score}</p>
         
         {stages.map(stage => (
             <div key={stage.stage_number} className={`stage-item stage-${stage.status.toLowerCase()}`}>
@@ -42,7 +37,7 @@ const StageTracker = ({ farmerId, stages, uploads, name, phone, totalDisbursed, 
                 }</span>
                 <span className="stage-name">Stage {stage.stage_number}: {stage.stage_name}</span>
                 <span className="stage-disbursement">(${stage.disbursement_amount.toFixed(2)})</span>
-                <span className="stage-uploads">  // New: Display uploads
+                <span className="stage-uploads">
                     Uploads: {uploads.filter(u => u.stage_number === stage.stage_number).map(u => u.file_type).join(', ') || 'None'}
                 </span>
                 {stage.status === 'UNLOCKED' && (
@@ -66,31 +61,33 @@ const StageTracker = ({ farmerId, stages, uploads, name, phone, totalDisbursed, 
     </div>
 );
 
-// --- Lender Dashboard Implementation ---
 const LenderDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmer, setSelectedFarmer] = useState(null);
+    const [error, setError] = useState(null);
 
     const fetchFarmers = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
             setFarmers(response.data);
             setSelectedFarmer(null);
+            setError(null);
         } catch (error) {
             console.error("Failed to fetch farmer list:", error);
-            alert("Failed to fetch farmers. Please try again.");
+            setError(`Failed to fetch farmers: ${error.response?.data?.message || 'Server error'}`);
         }
     };
     
     const fetchFarmerDetails = async (id) => {
         try {
-            console.log(`Fetching details for farmer ID: ${id}`); // New: Debug logging
+            console.log(`Lender: Fetching details for farmer ID: ${id}`);
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
-            console.log(`Farmer details response:`, response.data); // New: Debug logging
+            console.log(`Lender: Farmer details response:`, response.data);
             setSelectedFarmer(response.data);
+            setError(null);
         } catch (error) {
-            console.error(`Failed to fetch farmer details for ID ${id}:`, error);
-            alert(`Failed to fetch farmer details: ${error.response?.data?.message || 'Server error'}`);
+            console.error(`Lender: Failed to fetch farmer details for ID ${id}:`, error);
+            setError(`Failed to fetch farmer details: ${error.response?.data?.message || 'Server error'}`);
         }
     };
 
@@ -116,11 +113,11 @@ const LenderDashboard = ({ setView }) => {
                 <StageTracker
                     farmerId={selectedFarmer.farmer_id}
                     stages={selectedFarmer.stages}
-                    uploads={selectedFarmer.uploads}  // New: Pass uploads
+                    uploads={selectedFarmer.uploads}
                     name={selectedFarmer.name}
                     phone={selectedFarmer.phone}
                     totalDisbursed={selectedFarmer.current_status.total_disbursed}
-                    score={selectedFarmer.current_status.score}  // New: Pass score
+                    score={selectedFarmer.current_status.score}
                     onApproval={handleApproval}
                 />
             </div>
@@ -132,6 +129,7 @@ const LenderDashboard = ({ setView }) => {
             <button onClick={() => setView('welcome')} className="btn-back">← Role Selection</button>
             <h1>Lender/Admin Dashboard</h1>
             <p>Monitor progress and approve stage-based disbursements. <button onClick={fetchFarmers}>Refresh</button></p>
+            {error && <p className="error">{error}</p>}
             <div className="farmer-list">
                 {farmers.length === 0 ? (
                     <p>No farmers registered. Use the Farmer Mock-up to register one!</p>
@@ -139,7 +137,7 @@ const LenderDashboard = ({ setView }) => {
                     farmers.map(farmer => (
                         <div key={farmer.id} className="farmer-card">
                             <h3>{farmer.name}</h3>
-                            <p>ID: {farmer.id} | Progress: {farmer.stages_completed} | Score: {farmer.score}</p>  // Updated: Added score
+                            <p>ID: {farmer.id} | Progress: {farmer.stages_completed} | Score: {farmer.score}</p>
                             <button onClick={() => fetchFarmerDetails(farmer.id)}>View Details</button>
                         </div>
                     ))
@@ -149,16 +147,15 @@ const LenderDashboard = ({ setView }) => {
     );
 };
 
-// New: Field Officer Dashboard
 const FieldOfficerDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmer, setSelectedFarmer] = useState(null);
-    const [error, setError] = useState(null); // New: Error handling
+    const [error, setError] = useState(null);
 
     const fetchFarmers = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
-            console.log("Field Officer: Fetched farmers:", response.data); // New: Debug logging
+            console.log("Field Officer: Fetched farmers:", response.data);
             setFarmers(response.data);
             setSelectedFarmer(null);
             setError(null);
@@ -170,9 +167,9 @@ const FieldOfficerDashboard = ({ setView }) => {
     
     const fetchFarmerDetails = async (id) => {
         try {
-            console.log(`Field Officer: Fetching details for farmer ID: ${id}`); // New: Debug logging
+            console.log(`Field Officer: Fetching details for farmer ID: ${id}`);
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
-            console.log(`Field Officer: Farmer details response:`, response.data); // New: Debug logging
+            console.log(`Field Officer: Farmer details response:`, response.data);
             setSelectedFarmer(response.data);
             setError(null);
         } catch (error) {
@@ -219,7 +216,7 @@ const FieldOfficerDashboard = ({ setView }) => {
             <button onClick={() => setView('welcome')} className="btn-back">← Role Selection</button>
             <h1>Field Officer Dashboard</h1>
             <p>Review uploads and approve stage-based milestones. <button onClick={fetchFarmers}>Refresh</button></p>
-            {error && <p className="error">{error}</p>}  // New: Display errors
+            {error && <p className="error">{error}</p>}
             <div className="farmer-list">
                 {farmers.length === 0 ? (
                     <p>No farmers registered. Use the Farmer Mock-up to register one!</p>
@@ -237,7 +234,6 @@ const FieldOfficerDashboard = ({ setView }) => {
     );
 };
 
-// --- Farmer Chatbot Mock Implementation ---
 const FarmerChatbotMock = ({ setView }) => {
     const [chatHistory, setChatHistory] = useState([]);
     const [input, setInput] = useState('');
@@ -253,7 +249,7 @@ const FarmerChatbotMock = ({ setView }) => {
     const startFlow = () => {
         setChatHistory([]);
         setFarmerId(null);
-        botMessage("Welcome to the GENFIN-AFRICA demo chat (For Demonstration Only)! Type 'REGISTER' or 'STATUS'.");  // Updated: Disclaimer
+        botMessage("Welcome to the GENFIN-AFRICA demo chat (For Demonstration Only)! Type 'REGISTER' or 'STATUS'.");
         setFlowState('INTRO');
     };
 
@@ -266,9 +262,9 @@ const FarmerChatbotMock = ({ setView }) => {
             name: farmerData.name,
             phone: farmerData.phone,
             crop: farmerData.crop,
-            land_size: Number(farmerData.land_size)  // New: Ensure land_size is a number
+            land_size: Number(farmerData.land_size)
         };
-        console.log("Sending registration payload:", payload);  // New: Debug logging
+        console.log("Sending registration payload:", JSON.stringify(payload));
         addMessage('BOT', "Submitting registration...");
         try {
             const response = await axios.post(`${API_BASE_URL}/api/farmer/register`, payload, {
@@ -280,14 +276,13 @@ const FarmerChatbotMock = ({ setView }) => {
             addMessage('BOT', `✅ Success! You are registered. Your ID is ${newId}. Stage 1 (Soil Test) is UNLOCKED.`);
             addMessage('BOT', `Please upload a soil test file for Stage 1. Type 'UPLOAD'.`);
         } catch (error) {
-            console.error("Registration error:", error.response?.data);  // New: Debug logging
+            console.error("Registration error:", error.response?.data || error);
             addMessage('BOT', `❌ Registration failed: ${error.response?.data?.message || 'Server error'}`);
             setFlowState('INTRO');
         }
         setFarmerData({});
     };
 
-    // New: Handle file uploads
     const handleUpload = async (stageNumber, fileType, fileName) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/api/farmer/${farmerId}/upload`, {
@@ -342,9 +337,9 @@ const FarmerChatbotMock = ({ setView }) => {
             const statusResponse = await axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`);
             const stagesText = statusResponse.data.stages.map(s =>
                 `${s.status === 'COMPLETED' ? '✅' : s.status === 'UNLOCKED' ? '🔓' : '🔒'} Stage ${s.stage_number}: ${s.stage_name} - ${s.status}`).join('\n');
-            const uploadsText = statusResponse.data.uploads.map(u =>
+            const uploadsText = (statusResponse.data.uploads || []).map(u =>
                 `Stage ${u.stage_number}: ${u.file_type} (${u.file_name})`).join('\n') || 'None';
-            addMessage('BOT', `--- YOUR STATUS ---\nScore: ${statusResponse.data.current_status.score}\n${stagesText}\nTotal Disbursed: $${statusResponse.data.current_status.total_disbursed.toFixed(2)}\nUploads:\n${uploadsText}`);  // Updated: Added score, uploads
+            addMessage('BOT', `--- YOUR STATUS ---\nScore: ${statusResponse.data.current_status.score}\n${stagesText}\nTotal Disbursed: $${statusResponse.data.current_status.total_disbursed.toFixed(2)}\nUploads:\n${uploadsText}`);
         } catch (error) {
             addMessage('BOT', `❌ Failed to fetch status. Are you sure your ID is correct?`);
         }
@@ -396,7 +391,7 @@ const FarmerChatbotMock = ({ setView }) => {
                 botMessage("Invalid land size. Please enter a non-negative number.");
             } else {
                 setFarmerData(prev => ({ ...prev, land_size: landSize }));
-                console.log("Farmer data before registration:", { ...farmerData, land_size: landSize });  // New: Debug logging
+                console.log("Farmer data before registration:", { ...farmerData, land_size: landSize });
                 handleRegistration();
             }
         } else if (flowState === 'UPLOAD') {
@@ -493,7 +488,6 @@ const FarmerChatbotMock = ({ setView }) => {
     );
 };
 
-// --- Main App Component ---
 function App() {
     const [view, setView] = useState('welcome');
 
@@ -503,7 +497,7 @@ function App() {
                 return <FarmerChatbotMock setView={setView} />;
             case 'lender':
                 return <LenderDashboard setView={setView} />;
-            case 'fieldOfficer':  // New: Field officer view
+            case 'fieldOfficer':
                 return <FieldOfficerDashboard setView={setView} />;
             case 'welcome':
             default:
