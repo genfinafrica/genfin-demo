@@ -21,7 +21,7 @@ const WelcomeScreen = ({ setView }) => (
                 Lender/Admin Dashboard
             </button>
         </div>
-        <p className="disclaimer">Backend hosted securely on PythonAnywhere.</p>
+        <p className="disclaimer">Powered by eSusFarm Africa.</p>
     </div>
 );
 
