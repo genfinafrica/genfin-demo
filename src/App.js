@@ -32,13 +32,13 @@ const WelcomeScreen = ({ setView }) => (
                 Field Officer Dashboard
             </button>
         </div>
-        <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>
+        <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a>
          {/* LOGO ELEMENT */}
         <img 
             src={LOGO_SRC} 
             alt="eSusFarm Africa Logo" 
             className="esusfarm-logo" 
-        />           
+        /></p>           
     </div>
 );
                     
