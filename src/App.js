@@ -22,7 +22,7 @@ const WelcomeScreen = ({ setView }) => (
                 Field Officer Dashboard
             </button>
         </div>
-        
+       <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>             
     </div>
 );
 
