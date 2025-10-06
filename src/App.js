@@ -251,17 +251,23 @@ const FarmerChatbotMock = ({ setView }) => {
     const [farmerData, setFarmerData] = useState({});
     const [farmerId, setFarmerId] = useState(null);
     const [showMockFileInput, setShowMockFileInput] = useState(false);
+    const chatWindowRef = useRef(null);
 
-    const botMessage = (text) => setChatHistory(prev => [...prev, { sender: 'BOT', text, time: new Date() }]);
     const addMessage = (sender, text) => {
         setChatHistory(prev => [...prev, { sender, text, time: new Date() }]);
     };
+    
+    useEffect(() => {
+        if (chatWindowRef.current) {
+            chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+        }
+    }, [chatHistory]);
 
     const startFlow = () => {
         setChatHistory([]);
         setFarmerId(null);
         setShowMockFileInput(false);
-        botMessage("Welcome to the GENFIN-AFRICA demo chat! I am your financing assistant. Type 'REGISTER' to start a new loan, or 'STATUS' if you already have an ID.");
+        addMessage("BOT", "Welcome to the GENFIN-AFRICA demo chat! I am your financing assistant. Type 'REGISTER' to start a new loan, or 'STATUS' if you already have an ID.");
         setFlowState('INTRO');
     };
 
