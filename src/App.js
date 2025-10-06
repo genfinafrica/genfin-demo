@@ -20,7 +20,7 @@ const WelcomeScreen = ({ setView }) => (
                 Field Officer Dashboard
             </button>
         </div>
-        <p className="disclaimer">For Demonstration Only. Backend hosted securely on PythonAnywhere.</p>
+        <p className="disclaimer">For Demonstration Only. Powered by eSusFarm Africa.</p>
     </div>
 );
 
