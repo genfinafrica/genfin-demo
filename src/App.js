@@ -575,7 +575,7 @@ const FarmerChatbotMock = ({ setView }) => {
     return (
         <div className="chatbot-container">
             <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
-            <h2>Whatsapp Farmer Chatbot Mock-up</h2>
+            <h3>Whatsapp Farmer Chatbot Mock-up</h3>
 
             <div className="chat-window" style={{ minHeight: 300, maxHeight: 420, overflowY: 'auto' }}>
                 {messages.map((msg, index) => (
