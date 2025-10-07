@@ -553,7 +553,114 @@ const LenderDashboard = ({ setView }) => {
     );
 };
 
+// --- FIELD OFFICER DASHBOARD ---
 
+const FieldOfficerDashboard = ({ setView }) => {
+    const [farmers, setFarmers] = useState([]);
+    const [selectedFarmerId, setSelectedFarmerId] = useState(null);
+    const [farmerData, setFarmerData] = useState(null);
+
+    const fetchFarmers = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
+            setFarmers(response.data);
+        } catch (error) {
+            console.error("Error fetching farmers:", error);
+        }
+    };
+    
+    const fetchFarmerDetails = async (id) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
+            setFarmerData(response.data);
+            setSelectedFarmerId(id);
+        } catch (error) {
+            console.error("Error fetching farmer details:", error);
+        }
+    };
+
+    const handleApprove = async (stageNumber) => {
+        if (!farmerData) return;
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/field-officer/approve/${selectedFarmerId}/${stageNumber}`);
+            alert(response.data.message);
+            await fetchFarmerDetails(selectedFarmerId);
+            await fetchFarmers(); // Refresh list to update completion counts
+        } catch (error) {
+            alert(error.response?.data?.message || "Approval failed.");
+        }
+    };
+
+    const handlePestTrigger = async () => {
+        if (!farmerData) return;
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/field-officer/trigger_pest/${selectedFarmerId}`);
+            alert(response.data.message);
+            await fetchFarmerDetails(selectedFarmerId);
+        } catch (error) {
+            alert(error.response?.data?.message || "Trigger failed.");
+        }
+    };
+
+    useEffect(() => {
+        fetchFarmers();
+    }, []);
+
+    // Render list of farmers
+    if (!selectedFarmerId || !farmerData) {
+        return (
+            <div className="dashboard-list-container">
+                <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+                <h2>Field Officer Dashboard</h2>
+                <p>Select a farmer to view milestones and approve stages.</p>
+                {farmers.map((farmer) => (
+                    <div key={farmer.id} className="farmer-card">
+                        <div>
+                            <strong>{farmer.name} (ID: {farmer.id})</strong><br/>
+                            <span>Completed Stages: {farmer.stages_completed} | Score: {farmer.score}</span>
+                        </div>
+                        <button className="btn-view" onClick={() => fetchFarmerDetails(farmer.id)}>View Stages</button>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    
+    // Render detailed view
+    return (
+        <div className="dashboard-list-container">
+            <button className="btn-back" onClick={() => { setSelectedFarmerId(null); setFarmerData(null); fetchFarmers(); }}>← Back to List</button>
+            <h2>{farmerData.name}'s Stage Approvals</h2>
+            
+            <div style={{ margin: '15px 0', padding: '10px', border: '1px solid #dc3545', borderRadius: '5px' }}>
+                <p style={{ margin: '0 0 10px 0' }}>**Field Officer Action** (Simulate manual or IoT confirmation):</p>
+                <button className="btn-insurer" onClick={handlePestTrigger}>
+                    Trigger Pest Event (Unlock Stage 5)
+                </button>
+                <span style={{ marginLeft: '15px', color: farmerData.current_status.pest_flag ? 'red' : 'green' }}>
+                    Pest Flag Status: {farmerData.current_status.pest_flag ? 'ACTIVE' : 'NO EVENT'}
+                </span>
+            </div>
+            
+            <h4>Milestone Checkpoints</h4>
+            {farmerData.stages.map(stage => (
+                <div key={stage.stage_number} className={`stage-item stage-${stage.status.toLowerCase()}`}>
+                    <span className="stage-name">{stage.stage_name}</span>
+                    <span className="stage-uploads">
+                        Uploads: {farmerData.uploads.filter(u => u.stage_number === stage.stage_number).map(u => u.file_name).join(', ') || 'None'}
+                    </span>
+                    <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
+                    {stage.status === 'PENDING' && (
+                        <button className="btn-approve" onClick={() => handleApprove(stage.stage_number)}>
+                            Approve
+                        </button>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+};
+    
 
 // +++ REFACTORED INSURER DASHBOARD TO BE DYNAMIC +++
 const InsurerDashboard = ({ setView }) => {
