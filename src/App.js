@@ -553,49 +553,7 @@ const LenderDashboard = ({ setView }) => {
     );
 };
 
-// --- FIELD OFFICER DASHBOARD ---
 
-const FieldOfficerDashboard = ({ setView }) => {
-    // ... state management and fetch functions remain the same ...
-    const handleApprove = async (stageNumber) => { /* ... no changes ... */ };
-    const handlePestTrigger = async () => { /* ... no changes ... */ };
-    
-    // ... list view JSX remains the same ...
-
-    // Detailed view JSX
-    return (
-        <div className="dashboard-list-container">
-            <button className="btn-back" onClick={() => { setSelectedFarmerId(null); setFarmerData(null); fetchFarmers(); }}>← Back to List</button>
-            <h2>{farmerData.name}'s Stage Approvals</h2>
-            
-            <div style={{ margin: '15px 0', padding: '10px', border: '1px solid #dc3545', borderRadius: '5px' }}>
-                <p style={{ margin: '0 0 10px 0' }}>**Field Officer Action** (Simulate manual or IoT confirmation):</p>
-                <button className="btn-insurer" onClick={handlePestTrigger}>
-                    Trigger Pest Event (Unlock Stage 5)
-                </button>
-                <span style={{ marginLeft: '15px', color: farmerData.current_status.pest_flag ? 'red' : 'green' }}>
-                    Pest Flag Status: {farmerData.current_status.pest_flag ? 'ACTIVE' : 'NO EVENT'}
-                </span>
-            </div>
-            
-            <h4>Milestone Checkpoints</h4>
-            {farmerData.stages.map(stage => (
-                <div key={stage.stage_number} className={`stage-item stage-${stage.status.toLowerCase()}`}>
-                    <span className="stage-name">{stage.stage_name}</span>
-                    <span className="stage-uploads">
-                        Uploads: {farmerData.uploads.filter(u => u.stage_number === stage.stage_number).map(u => u.file_name).join(', ') || 'None'}
-                    </span>
-                    <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
-                    {stage.status === 'PENDING' && (
-                        <button className="btn-approve" onClick={() => handleApprove(stage.stage_number)}>
-                            Approve
-                        </button>
-                    )}
-                </div>
-            ))}
-        </div>
-    );
-};
 
 // +++ REFACTORED INSURER DASHBOARD TO BE DYNAMIC +++
 const InsurerDashboard = ({ setView }) => {
