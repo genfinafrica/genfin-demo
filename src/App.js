@@ -552,7 +552,7 @@ const FarmerChatbotMock = ({ setView }) => {
     
     // --- INITIALIZATION ---
     useEffect(() => {
-        pushBotMessage(`Welcome to the GENFIN 🌱 Demo. Please **REGISTER** to start or type **STATUS** if you are Farmer ID 1 (Aisha Abdalla).`);
+        pushBotMessage(`Welcome to the GENFIN 🌱 Demo. I am your financing assistant. Please **REGISTER** to start or type **STATUS** if you already have a Farmer ID.`);
     }, []);
     
     // --- RENDER ---
