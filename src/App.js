@@ -816,7 +816,9 @@ const WelcomeScreen = ({ setView }) => (
                 Insurer Dashboard
             </button>
         </div>
-        <p className="disclaimer">Note: You must run the backend's 'flask init-db' command once before using the app.</p>
+      <p className="disclaimer">For Demonstration Only.
+            Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a>
+        </p>  
     </div>
 );
 
