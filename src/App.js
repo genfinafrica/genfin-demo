@@ -355,7 +355,7 @@ const InsurerDashboard = ({ setView }) => {
                 <button onClick={() => setSelectedFarmer(null)} className="btn-back">← Back to List</button>
                 <h2>{selectedFarmer.name}'s Insurance Status</h2>
                 <p>Policy ID: {selectedFarmer.policy_id || 'Not Bound'}</p>
-                <p>Triggers: Rainfall <10mm</p>
+                <p>Triggers: Rainfall &lt;10mm</p>
                 <button onClick={() => handleBindPolicy(selectedFarmer.farmer_id)}>Bind Policy</button>
                 <button onClick={() => handleCheckTrigger(selectedFarmer.farmer_id)}>Check Trigger</button>
             </div>
