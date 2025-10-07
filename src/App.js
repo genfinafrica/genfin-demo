@@ -478,8 +478,24 @@ const LenderDashboard = ({ setView }) => {
     const [selectedFarmerId, setSelectedFarmerId] = useState(null);
     const [farmerData, setFarmerData] = useState(null);
 
-    const fetchFarmers = async () => { /* ... no changes ... */ };
-    const fetchFarmerDetails = async (id) => { /* ... no changes ... */ };
+    const fetchFarmers = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
+        setFarmers(response.data);
+    } catch (error) {
+        console.error("Error fetching farmers:", error);
+    }
+};
+
+const fetchFarmerDetails = async (id) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
+        setFarmerData(response.data);
+        setSelectedFarmerId(id);
+    } catch (error) {
+        console.error("Error fetching farmer details:", error);
+    }
+};
 
     const handleDisburse = async (stageNumber) => {
         if (!farmerData) return;
