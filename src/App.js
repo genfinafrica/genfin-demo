@@ -1,0 +1,839 @@
+// src/App.js
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import './App.css';
+
+// Ensure this matches the URL where your Flask backend is running
+// If you changed the port to 5001, update this line:
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000'; 
+
+// This is the logo source from your Google Drive link
+const LOGO_SRC = "https://lh3.googleusercontent.com/d/1JWvtX4b24wt5vRGmhYsUW029NS0grXOq";
+
+// --- UTILITY COMPONENTS ---
+
+// Generic Modal Component (FIX for XAI/Contract Popups)
+const Modal = ({ show, onClose, title, children }) => {
+    if (!show) {
+        return null;
+    }
+    return (
+        // onClick handles clicking outside the modal content to close
+        <div className="modal" onClick={onClose}> 
+            {/* onClick stopPropagation prevents clicking the content from closing the modal */}
+            <div className="modal-content" onClick={e => e.stopPropagation()}> 
+                <button className="btn-back" onClick={onClose} style={{ float: 'right' }}>Close</button>
+                <h3>{title}</h3>
+                {children}
+            </div>
+        </div>
+    );
+};
+
+// Helper function to format bot message text with action styling (FIX for Bolding)
+const formatBotMessage = (text) => {
+    // The regex matches the command words and replaces them with a styled span.
+    const regex = /(STATUS|NEXT STAGE|UPLOAD|REGISTER)/g;
+    return text.replace(regex, '<span class="chatbot-action-prompt">$&</span>');
+};
+
+// --- DASHBOARD COMPONENTS ---
+
+const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, contractState, stages }) => {
+    const [showXaiModal, setShowXaiModal] = useState(false);
+    const [showContractModal, setShowContractModal] = useState(false);
+
+    // Filter and prepare XAI data for modal table
+    const xaiData = xaiFactors && xaiFactors.length > 0
+        ? xaiFactors.map(f => [f.factor, f.weight.toFixed(1)])
+        : [['N/A', 'N/A']];
+    xaiData.unshift(['Factor', 'Contribution']);
+
+    // Mock Contract Log Data (Needs to be fetched from API for real data, here we mock it)
+    const mockContractLog = [
+        ['2025-01-01 10:00', 'DRAFT', contractHash.substring(0, 10) + '...'],
+        ['2025-01-01 11:30', 'ACTIVE', 'A5B7C2D9E0...'],
+        ['2025-01-08 09:00', 'STAGE_1_COMPLETED', 'F8G2H4I6J7...'],
+        ['2025-02-15 14:00', contractState, contractHash.substring(0, 10) + '...']
+    ];
+    mockContractLog.unshift(['Timestamp', 'State Transition', 'Hash']);
+    
+    // Reverse stage order for display (latest first)
+    const reversedStages = [...stages].reverse();
+    
+    return (
+        <div className="tracker-box">
+            <h3>Farmer Tracker: {farmer.name} (ID: {farmer.farmer_id})</h3>
+            <div className="farmer-status-summary" style={{ display: 'flex', justifyContent: 'space-around', margin: '20px 0' }}>
+                <div style={{ padding: '10px', borderRight: '1px solid #ddd' }}>
+                    <strong>Score: {score}</strong> <br />
+                    Risk: <span style={{ color: risk === 'LOW' ? 'green' : risk === 'HIGH' ? 'red' : 'orange' }}>{risk}</span>
+                    <button className="btn-view" onClick={() => setShowXaiModal(true)} style={{ marginLeft: '10px' }}>
+                        View XAI
+                    </button>
+                </div>
+                <div style={{ padding: '10px' }}>
+                    <strong>Contract: {contractState}</strong> <br />
+                    Hash: {contractHash.substring(0, 10)}...
+                    <button className="btn-view" onClick={() => setShowContractModal(true)} style={{ marginLeft: '10px' }}>
+                        View Contract
+                    </button>
+                </div>
+            </div>
+
+            <h4>Loan Stage Tracker</h4>
+            {reversedStages.map((stage) => (
+                <div 
+                    key={stage.stage_number} 
+                    className={`stage-item stage-${stage.status.toLowerCase()}`}
+                >
+                    <span className="stage-name">{stage.stage_name}</span>
+                    <span className="stage-disbursement">${stage.disbursement_amount.toFixed(2)}</span>
+                    <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
+                </div>
+            ))}
+
+            {/* XAI Modal (FIX: Rendered as a Popup) */}
+            <Modal show={showXaiModal} onClose={() => setShowXaiModal(false)} title="AI Proficiency Score (XAI)">
+                <p><strong>Score: {score}</strong> | Risk Band: {risk}</p>
+                <p>Explanation of the current score based on mocked federated learning factors:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Factor</th>
+                            <th>Contribution (Mock)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {xaiFactors.map((f, index) => (
+                            <tr key={index}>
+                                <td>{f.factor}</td>
+                                <td>+{f.weight.toFixed(1)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Modal>
+
+            {/* Contract Modal (FIX: Rendered as a Popup) */}
+            <Modal show={showContractModal} onClose={() => setShowContractModal(false)} title="Smart Contract Audit Trail">
+                <p>This is a simulated immutable log of all contract state transitions.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>State Transition</th>
+                            <th>Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {mockContractLog.slice(1).map((row, index) => (
+                            <tr key={index}>
+                                <td>{row[0]}</td>
+                                <td>{row[1]}</td>
+                                <td>{row[2]}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Modal>
+        </div>
+    );
+};
+
+// --- CHATBOT MOCK ---
+
+const FarmerChatbotMock = ({ setView }) => {
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const [farmerId, setFarmerId] = useState(1);
+    const [farmerStatus, setFarmerStatus] = useState(null);
+    const [showUploadInput, setShowUploadInput] = useState(false);
+    const [showRegistrationForm, setShowRegistrationForm] = useState(true);
+    const [showIoTInput, setShowIoTInput] = useState(false);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(scrollToBottom, [messages]);
+
+    const pushBotMessage = (text) => {
+        setMessages(prev => [...prev, {
+            id: Date.now(),
+            text: text,
+            sender: 'bot',
+            timestamp: new Date().toLocaleTimeString(),
+        }]);
+    };
+
+    const pushUserMessage = (text) => {
+        setMessages(prev => [...prev, {
+            id: Date.now() + 1,
+            text: text,
+            sender: 'user',
+            timestamp: new Date().toLocaleTimeString(),
+        }]);
+    };
+
+    const fetchStatus = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`);
+            setFarmerStatus(response.data);
+            const status = response.data.current_status;
+            const stages = response.data.stages;
+            const completedStages = stages.filter(s => s.status === 'COMPLETED').length;
+            
+            let statusMessage = `✅ Status for Aisha Abdalla:\n`;
+            statusMessage += `Score: ${status.score} (${status.risk_band})\n`;
+            statusMessage += `Total Disbursed: $${status.total_disbursed.toFixed(2)}\n`;
+            statusMessage += `Stages Completed: ${completedStages} / ${stages.length}\n`;
+            statusMessage += `Contract State: ${response.data.contract_state}\n`;
+            statusMessage += `Pest Flag: ${status.pest_flag ? '⚠️ ACTIVE' : 'NO'}\n\n`;
+            
+            pushBotMessage(statusMessage + `\nWhat's next? Type **NEXT STAGE**, **UPLOAD**, or **STATUS**.`);
+
+        } catch (error) {
+            pushBotMessage("❌ Error fetching status. Have you run 'flask init-db' and is the backend running?");
+            console.error(error);
+        }
+    };
+
+    const handleInput = async (e) => {
+        e.preventDefault();
+        const command = input.trim().toUpperCase();
+        pushUserMessage(input.trim());
+        setInput('');
+
+        if (showRegistrationForm) {
+            handleRegistration(input.trim());
+            return;
+        }
+
+        if (showUploadInput) {
+            handleFileUpload(input.trim());
+            setShowUploadInput(false);
+            return;
+        }
+
+        if (showIoTInput) {
+            handleIotData(input.trim());
+            setShowIoTInput(false);
+            return;
+        }
+
+        switch (command) {
+            case 'STATUS':
+                fetchStatus();
+                break;
+            
+            case 'NEXT STAGE':
+                handleNextStage();
+                break;
+                
+            case 'UPLOAD':
+                await initiateUpload();
+                break;
+
+            case 'TRIGGER PEST': // Hidden command for demo purposes
+                handlePestTrigger();
+                break;
+
+            case 'TRIGGER INSURANCE': // Hidden command for demo purposes
+                handleInsuranceTrigger();
+                break;
+
+            case 'INGEST IOT': // Hidden command for demo purposes
+                setShowIoTInput(true);
+                pushBotMessage("Please enter mock IoT data (e.g., pH 6.8, Moisture 20, Temp 30) or type 'CANCEL'.");
+                break;
+            
+            case 'BACK':
+                setView('welcome');
+                break;
+
+            default:
+                pushBotMessage("I didn't understand that. Please try **STATUS**, **NEXT STAGE**, **UPLOAD**, or **BACK**.");
+        }
+    };
+
+    // --- UPLOAD HANDLERS ---
+    
+    // Mapping acceptable formats to stages (FIX for Upload Message Clarity)
+    const stageFileFormats = {
+        1: '.csv (Soil Test Data)',
+        2: '.jpg, .jpeg, .png, .pdf (Input Purchase Evidence)',
+        3: '.pdf (Insurance Premium Proof)',
+        4: '.jpg, .jpeg, .png, .pdf (Weeding/Maintenance Photo)',
+        6: '.jpg, .jpeg, .png, .pdf (Harvest Photo)',
+        7: '.jpg, .jpeg, .png, .pdf (Transport/Marketing Proof)',
+    };
+    
+    const initiateUpload = async () => {
+        if (!farmerStatus) {
+            await fetchStatus();
+            if (!farmerStatus) {
+                 pushBotMessage("Please check **STATUS** first.");
+                 return;
+            }
+        }
+        
+        const nextStage = farmerStatus.stages.find(s => s.status === 'UNLOCKED' || s.status === 'PENDING');
+        
+        if (!nextStage) {
+            pushBotMessage("All stages are either COMPLETED or LOCKED. No upload required now.");
+            return;
+        }
+        
+        // Conditional Stage 5 logic check
+        if (nextStage.stage_number === 5) {
+            if (farmerStatus.current_status.pest_flag) {
+                pushBotMessage(`Stage 5: Pest/Disease (Conditional) is UNLOCKED due to a pest event. Please submit the **Inputs/Invoice Photo** for this disbursement.`);
+            } else {
+                 pushBotMessage("Stage 5 (Pest/Disease) is LOCKED and requires an event trigger first. Please continue to the next available stage or check **STATUS**.");
+                 return;
+            }
+        }
+
+        setShowUploadInput(true);
+        const formatInfo = stageFileFormats[nextStage.stage_number] || '.jpg, .pdf';
+        
+        let uploadInstructions = `
+            Stage ${nextStage.stage_number}: ${nextStage.stage_name} is UNLOCKED.
+            Please enter the **file name** and **file type** separated by a comma, e.g., 'Soil_Report.csv'.
+            **Acceptable formats for Stage ${nextStage.stage_number}:** ${formatInfo}. 
+            Type 'CANCEL' to abort.
+        `;
+        pushBotMessage(uploadInstructions);
+    };
+
+    const handleFileUpload = async (fileInput) => {
+        const [fileName, fileType] = fileInput.split(',').map(s => s.trim());
+        
+        if (fileName.toUpperCase() === 'CANCEL') {
+            pushBotMessage("Upload cancelled. What's next? **STATUS** or **NEXT STAGE**.");
+            return;
+        }
+        
+        if (!fileName || !fileType) {
+            pushBotMessage("Invalid format. Please enter file name and type, e.g., 'Photo_1.jpg'. Try **UPLOAD** again.");
+            return;
+        }
+
+        const nextStage = farmerStatus.stages.find(s => s.status === 'UNLOCKED' || s.status === 'PENDING');
+        if (!nextStage) return; 
+
+        // Mock Soil Test Data (for stage 1)
+        const soilData = nextStage.stage_number === 1 ? { ph: 6.8, nitrogen: 30, moisture: 25 } : {};
+        
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/farmer/${farmerId}/upload`, {
+                stage_number: nextStage.stage_number,
+                file_type: fileType,
+                file_name: fileName,
+                soil_data: soilData 
+            });
+            pushBotMessage(`✅ ${response.data.message} Status updated to PENDING for Field Officer approval. Type **STATUS** to view score update.`);
+        } catch (error) {
+            pushBotMessage(`❌ Upload failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+    
+    // --- COMMAND HANDLERS ---
+
+    const handleRegistration = async (input) => {
+        const parts = input.split(',').map(s => s.trim());
+        if (parts.length < 4) {
+             pushBotMessage("Please enter all required fields: Name, Phone, Crop, Land Size (e.g., Aisha Abdalla, 254711223344, Maize, 5.0).");
+             return;
+        }
+        const [name, phone, crop, land_size_str] = parts;
+        
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/farmer/register`, {
+                name, phone, crop, land_size: parseFloat(land_size_str),
+                // Mock additional data for full registration
+                id_document: 'ID123', gender: 'Female', age: 35
+            });
+            
+            setFarmerId(response.data.farmer_id);
+            setShowRegistrationForm(false);
+            pushBotMessage(`✅ Registration successful! Your Farmer ID is ${response.data.farmer_id}. You can now use commands: **STATUS**, **NEXT STAGE**, **UPLOAD**.`);
+            fetchStatus(); // Fetch initial status immediately after registration
+        } catch (error) {
+            pushBotMessage(`❌ Registration failed: ${error.response?.data?.message || 'Check if the phone number is already in use.'}`);
+        }
+    };
+
+    const handleNextStage = async () => {
+        // Mock API call to manually trigger non-upload stages like Stage 3 (Insurance)
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/farmer/${farmerId}/trigger`);
+            pushBotMessage(`✅ ${response.data.message} Type **STATUS** to check for updates.`);
+        } catch (error) {
+            pushBotMessage(`Stage trigger failed: ${error.response?.data?.message || error.message}. Check **STATUS** to see if a file **UPLOAD** is required.`);
+        }
+    };
+
+    const handlePestTrigger = async () => {
+        // Hidden command for Field Officer/IoT mock trigger
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/field-officer/trigger_pest/${farmerId}`);
+            pushBotMessage(`✅ ${response.data.message}`);
+        } catch (error) {
+             pushBotMessage(`❌ Pest trigger failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const handleInsuranceTrigger = async () => {
+        // Hidden command for Insurer mock trigger (simulating drought check)
+         try {
+            const response = await axios.post(`${API_BASE_URL}/api/insurer/trigger/${farmerId}`, { rainfall: 5 });
+            pushBotMessage(`✅ ${response.data.message}`);
+        } catch (error) {
+             pushBotMessage(`❌ Insurance trigger failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const handleIotData = async (dataInput) => {
+         if (dataInput.toUpperCase() === 'CANCEL') {
+            pushBotMessage("IoT data ingestion cancelled. What's next? **STATUS** or **NEXT STAGE**.");
+            return;
+        }
+
+        // Mock parsing "pH 6.8, Moisture 20, Temp 30"
+        const data = dataInput.split(',').reduce((acc, part) => {
+            const [key, value] = part.trim().split(' ');
+            if (key && value) {
+                 acc[key.toLowerCase()] = parseFloat(value);
+            }
+            return acc;
+        }, {});
+
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/iot/ingest`, data);
+            pushBotMessage(`✅ ${response.data.message} Type **STATUS** to check for updates.`);
+        } catch (error) {
+             pushBotMessage(`❌ IoT ingestion failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+    
+    // --- INITIALIZATION ---
+    useEffect(() => {
+        // Initial welcome message
+        pushBotMessage(`Welcome to the GENFIN 🌱 Africa Demo. Please **REGISTER** to start or type **STATUS** if you are Farmer ID 1 (Aisha Abdalla).`);
+    }, []);
+
+    // --- RENDER ---
+    return (
+        <div className="chatbot-container">
+            <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+            <h2>Farmer Chatbot Interface</h2>
+            {farmerStatus && (
+                <FarmerDetailsCard 
+                    farmer={farmerStatus}
+                    score={farmerStatus.current_status.score}
+                    risk={farmerStatus.current_status.risk_band}
+                    xaiFactors={farmerStatus.current_status.xai_factors || []}
+                    contractHash={farmerStatus.contract_hash}
+                    contractState={farmerStatus.contract_state}
+                    stages={farmerStatus.stages}
+                />
+            )}
+            
+            <div className="chat-window">
+                {messages.map((msg, index) => (
+                    <div key={index} className={`message-row ${msg.sender}`}>
+                        {/* FIX: Use dangerouslySetInnerHTML to render HTML/Bolding */}
+                        <div className="message-bubble" dangerouslySetInnerHTML={{ __html: formatBotMessage(msg.text) }} />
+                        <span className="timestamp">{msg.timestamp}</span>
+                    </div>
+                ))}
+                <div ref={messagesEndRef} />
+            </div>
+
+            {showRegistrationForm && (
+                <div className="mock-file-input">
+                    <span>Enter Registration details: Name, Phone, Crop, Land Size (e.g., Aisha, 254..., Maize, 5.0)</span>
+                </div>
+            )}
+            
+            {(showUploadInput || showIoTInput) && (
+                 <div className="mock-file-input">
+                    <label htmlFor="mock-file">Select File (Mock)</label>
+                    <input type="file" id="mock-file" disabled />
+                    {/* FIX: Update message to clarify file formats */}
+                    <span>Specify file name and type (e.g., 'Soil_Report.csv', 'Photo.jpg').</span>
+                </div>
+            )}
+            
+            <form className="chat-input-form" onSubmit={handleInput}>
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Type your command or data..."
+                />
+                <button type="submit">Send</button>
+            </form>
+            <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>
+        </div>
+    );
+};
+
+// --- ADMIN/LENDER DASHBOARD ---
+
+const LenderDashboard = ({ setView }) => {
+    const [farmers, setFarmers] = useState([]);
+    const [selectedFarmerId, setSelectedFarmerId] = useState(null);
+    const [farmerData, setFarmerData] = useState(null);
+
+    const fetchFarmers = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
+            setFarmers(response.data);
+        } catch (error) {
+            console.error("Error fetching farmers:", error);
+        }
+    };
+
+    const fetchFarmerDetails = async (id) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
+            setFarmerData(response.data);
+            setSelectedFarmerId(id);
+        } catch (error) {
+            console.error("Error fetching farmer details:", error);
+        }
+    };
+
+    const handleDisburse = async (stageNumber) => {
+        if (!farmerData) return;
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/lender/disburse/${selectedFarmerId}/${stageNumber}`);
+            alert(response.data.message);
+            // Re-fetch details after disbursement
+            fetchFarmerDetails(selectedFarmerId); 
+        } catch (error) {
+            alert(error.response?.data?.message || "Disbursement failed.");
+        }
+    };
+
+    useEffect(() => {
+        fetchFarmers();
+    }, []);
+    
+    // Render list of farmers
+    if (!selectedFarmerId || !farmerData) {
+        return (
+            <div className="dashboard-list-container">
+                <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+                <h2>Lender/Admin Dashboard</h2>
+                <p>Select a farmer to view progress and disburse funds.</p>
+                {farmers.map((farmer) => (
+                    <div key={farmer.id} className="farmer-card">
+                        <div>
+                            <strong>{farmer.name} (ID: {farmer.id})</strong><br/>
+                            <span>Completed Stages: {farmer.stages_completed} | Score: {farmer.score}</span>
+                        </div>
+                        <div>
+                            <button className="btn-view" onClick={() => fetchFarmerDetails(farmer.id)}>View Progress</button>
+                            <a href={`${API_BASE_URL}/api/report/farmer/${farmer.id}`} target="_blank" rel="noopener noreferrer">
+                                <button className="btn-report">Download Report</button>
+                            </a>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    
+    // Render detailed view
+    return (
+        <div className="dashboard-list-container">
+            <button className="btn-back" onClick={() => { setSelectedFarmerId(null); setFarmerData(null); fetchFarmers(); }}>← Back to List</button>
+            <h2>{farmerData.name}'s Financing Tracker</h2>
+
+            <FarmerDetailsCard 
+                farmer={farmerData}
+                score={farmerData.current_status.score}
+                risk={farmerData.current_status.risk_band}
+                xaiFactors={farmerData.current_status.xai_factors || []}
+                contractHash={farmerData.contract_hash}
+                contractState={farmerData.contract_state}
+                stages={farmerData.stages}
+            />
+
+            <h4>Disbursement Actions (Lender)</h4>
+            {farmerData.stages.map(stage => (
+                <div key={stage.stage_number} className={`stage-item stage-${stage.status.toLowerCase()}`}>
+                    <span className="stage-name">{stage.stage_name}</span>
+                    <span className="stage-disbursement">${stage.disbursement_amount.toFixed(2)}</span>
+                    <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
+                    {stage.status === 'APPROVED' && (
+                        <button className="btn-lender" onClick={() => handleDisburse(stage.stage_number)}>
+                            Disburse Funds
+                        </button>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+// --- FIELD OFFICER DASHBOARD ---
+
+const FieldOfficerDashboard = ({ setView }) => {
+    const [farmers, setFarmers] = useState([]);
+    const [selectedFarmerId, setSelectedFarmerId] = useState(null);
+    const [farmerData, setFarmerData] = useState(null);
+
+    const fetchFarmers = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
+            setFarmers(response.data);
+        } catch (error) {
+            console.error("Error fetching farmers:", error);
+        }
+    };
+    
+    const fetchFarmerDetails = async (id) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
+            setFarmerData(response.data);
+            setSelectedFarmerId(id);
+        } catch (error) {
+            console.error("Error fetching farmer details:", error);
+        }
+    };
+
+    const handleApprove = async (stageNumber) => {
+        if (!farmerData) return;
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/field-officer/approve/${selectedFarmerId}/${stageNumber}`);
+            alert(response.data.message);
+            fetchFarmerDetails(selectedFarmerId); 
+        } catch (error) {
+            alert(error.response?.data?.message || "Approval failed.");
+        }
+    };
+
+    const handlePestTrigger = async () => {
+        if (!farmerData) return;
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/field-officer/trigger_pest/${selectedFarmerId}`);
+            alert(response.data.message);
+            fetchFarmerDetails(selectedFarmerId);
+        } catch (error) {
+            alert(error.response?.data?.message || "Trigger failed.");
+        }
+    };
+
+
+    useEffect(() => {
+        fetchFarmers();
+    }, []);
+
+    // Render list of farmers
+    if (!selectedFarmerId || !farmerData) {
+        return (
+            <div className="dashboard-list-container">
+                <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+                <h2>Field Officer Dashboard</h2>
+                <p>Select a farmer to view milestones and approve stages.</p>
+                {farmers.map((farmer) => (
+                    <div key={farmer.id} className="farmer-card">
+                        <div>
+                            <strong>{farmer.name} (ID: {farmer.id})</strong><br/>
+                            <span>Completed Stages: {farmer.stages_completed} | Score: {farmer.score}</span>
+                        </div>
+                        <button className="btn-view" onClick={() => fetchFarmerDetails(farmer.id)}>View Stages</button>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    
+    // Render detailed view
+    return (
+        <div className="dashboard-list-container">
+            <button className="btn-back" onClick={() => { setSelectedFarmerId(null); setFarmerData(null); fetchFarmers(); }}>← Back to List</button>
+            <h2>{farmerData.name}'s Stage Approvals</h2>
+            
+            {/* Pest Trigger Action */}
+            <div style={{ margin: '15px 0', padding: '10px', border: '1px solid #dc3545', borderRadius: '5px' }}>
+                <p style={{ margin: '0 0 10px 0' }}>**Field Officer Action** (Simulate manual or IoT confirmation):</p>
+                <button className="btn-insurer" onClick={handlePestTrigger}>
+                    Trigger Pest Event (Unlock Stage 5)
+                </button>
+                <span style={{ marginLeft: '15px', color: farmerData.current_status.pest_flag ? 'red' : 'green' }}>
+                    Pest Flag Status: {farmerData.current_status.pest_flag ? 'ACTIVE' : 'NO EVENT'}
+                </span>
+            </div>
+            
+            <h4>Milestone Checkpoints</h4>
+            {farmerData.stages.map(stage => (
+                <div key={stage.stage_number} className={`stage-item stage-${stage.status.toLowerCase()}`}>
+                    <span className="stage-name">{stage.stage_name}</span>
+                    <span className="stage-uploads">
+                        Uploads: {farmerData.uploads.filter(u => u.stage_number === stage.stage_number).map(u => u.file_name).join(', ') || 'None'}
+                    </span>
+                    <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
+                    {stage.status === 'PENDING' && (
+                        <button className="btn-approve" onClick={() => handleApprove(stage.stage_number)}>
+                            Approve
+                        </button>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+// --- INSURER DASHBOARD ---
+
+const InsurerDashboard = ({ setView }) => {
+    const [farmerData, setFarmerData] = useState(null);
+    const farmerId = 1; // Always use mock farmer 1 for the demo
+
+    const fetchFarmerDetails = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/farmer/${farmerId}/status`);
+            setFarmerData(response.data);
+        } catch (error) {
+            console.error("Error fetching farmer details:", error);
+            setFarmerData(null);
+        }
+    };
+    
+    const handleBindPolicy = async () => {
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/insurer/bind/${farmerId}`);
+            alert(response.data.message);
+            fetchFarmerDetails(); 
+        } catch (error) {
+            alert(error.response?.data?.message || "Policy binding failed.");
+        }
+    };
+
+    const handleClaimCheck = async () => {
+        try {
+            // Mocking a drought trigger (rainfall < 10)
+            const response = await axios.post(`${API_BASE_URL}/api/insurer/trigger/${farmerId}`, { rainfall: 5 });
+            alert(response.data.message);
+            fetchFarmerDetails(); 
+        } catch (error) {
+            alert(error.response?.data?.message || "Claim check failed.");
+        }
+    };
+
+    useEffect(() => {
+        fetchFarmerDetails();
+    }, []);
+    
+    // Find policy details
+    const policy = farmerData?.policy_id ? {
+        policy_id: farmerData.policy_id,
+        status: farmerData.stages.find(s => s.stage_name.includes('Insurance'))?.status === 'COMPLETED' ? 'ACTIVE' : 'PENDING' // Mocking active state after disbursement
+    } : null;
+    
+    // Render
+    return (
+        <div className="dashboard-list-container">
+            <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+            <h2>Insurer Dashboard</h2>
+            <p>Mock View for Farmer ID: {farmerId} ({farmerData?.name || 'Loading...'})</p>
+
+            {/* Policy Status Card (FIX: Added policy-card styling) */}
+            <div className="policy-card">
+                <h3>Weather-Index Insurance Policy</h3>
+                {!policy ? (
+                    <p>No policy created yet. Complete Stage 3 to generate policy.</p>
+                ) : (
+                    <>
+                        <p>Policy ID: <strong>{policy.policy_id}</strong></p>
+                        <p>Status: 
+                            <span className={`policy-status-${(policy.status || 'PENDING').toLowerCase()}`}>
+                                <strong>{policy.status}</strong>
+                            </span>
+                        </p>
+                        <p>Triggers: Rainfall below 10mm (Mock)</p>
+                    </>
+                )}
+            </div>
+
+            <div style={{ margin: '20px 0' }}>
+                <h4>Insurer Actions</h4>
+                <button className="btn-insurer" onClick={handleBindPolicy} disabled={policy?.status === 'ACTIVE'}>
+                    Bind Policy (Mock API)
+                </button>
+                <button className="btn-insurer" onClick={handleClaimCheck} disabled={policy?.status !== 'ACTIVE'}>
+                    Check Claim Trigger (Drought Mock)
+                </button>
+            </div>
+            
+            {farmerData && (
+                 <FarmerDetailsCard 
+                    farmer={farmerData}
+                    score={farmerData.current_status.score}
+                    risk={farmerData.current_status.risk_band}
+                    xaiFactors={farmerData.current_status.xai_factors || []}
+                    contractHash={farmerData.contract_hash}
+                    contractState={farmerData.contract_state}
+                    stages={farmerData.stages}
+                />
+            )}
+        </div>
+    );
+};
+
+// --- WELCOME SCREEN ---
+
+const WelcomeScreen = ({ setView }) => (
+    <div className="welcome-container">
+        {/* LOGO ELEMENT */}
+        <img 
+            src={LOGO_SRC} 
+            alt="eSusFarm Africa Logo" 
+            className="esusfarm-logo" 
+        />
+        
+        <h2>GENFIN 🌱 AFRICA</h2>
+        <p><b>G20 TechSprint 2025 Demo</b></p>
+        <p>Select a user role to begin the stage-based financing flow demonstration.</p>
+        <div className="role-buttons">
+            <button className="btn-farmer" onClick={() => setView('farmer')}>
+                Farmer Chatbot Mock
+            </button>
+            <button className="btn-lender" onClick={() => setView('lender')}>
+                Lender/Admin Dashboard
+            </button>
+            <button className="btn-field-officer" onClick={() => setView('fieldOfficer')}>
+                Field Officer Dashboard
+            </button>
+            <button className="btn-insurer" onClick={() => setView('insurer')}>
+                Insurer Dashboard
+            </button>
+        </div>
+        <p className="disclaimer">Note: You must run the backend's 'flask init-db' command once before using the app.</p>
+    </div>
+);
+
+
+// --- MAIN APP COMPONENT ---
+
+const App = () => {
+    const [view, setView] = useState('welcome');
+    return (
+        <div className="App">
+            {view === 'welcome' && <WelcomeScreen setView={setView} />}
+            {view === 'farmer' && <FarmerChatbotMock setView={setView} />}
+            {view === 'lender' && <LenderDashboard setView={setView} />}
+            {view === 'fieldOfficer' && <FieldOfficerDashboard setView={setView} />}
+            {view === 'insurer' && <InsurerDashboard setView={setView} />}
+        </div>
+    );
+};
+
+export default App;
