@@ -141,6 +141,446 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
     );
 };
 
+// --- CHATBOT MOCK (Updated to handle multi-step flows) ---
+
+const FarmerChatbotMock = ({ setView }) => {
+    // Existing State
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const [farmerId, setFarmerId] = useState(1);
+    const [farmerStatus, setFarmerStatus] = useState(null);
+    const [showUploadInput, setShowUploadInput] = useState(false);
+    // Removed old showRegistrationForm flag (lines 33, 44, 99)
+    const [showIoTInput, setShowIoTInput] = useState(false);
+    const messagesEndRef = useRef(null);
+
+    // --- NEW STATE FOR FLOW CONTROL ---
+    const [chatState, setChatState] = useState('AWAITING_COMMAND'); // Controls multi-step interactions
+    const [registrationData, setRegistrationData] = useState({}); // Stores data during registration flow
+    // ---------------------------------
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(scrollToBottom, [messages]);
+    
+    const pushBotMessage = (text) => {
+        setMessages(prev => [...prev, {
+            id: Date.now(),
+            text: text,
+            sender: 'bot',
+            timestamp: new Date().toLocaleTimeString(),
+        }]);
+    };
+
+    const pushUserMessage = (text) => {
+        setMessages(prev => [...prev, {
+            id: Date.now() + 1,
+            text: text,
+            sender: 'user',
+            timestamp: new Date().toLocaleTimeString(),
+        }]);
+    };
+
+    // Refactored to accept ID for reusability (Initial check, Status command, Registration success)
+    const fetchStatus = async (id = farmerId) => {
+        if (!id) {
+            pushBotMessage("Error: No Farmer ID available to check status.");
+            return;
+        }
+        try {
+            const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
+            setFarmerStatus(response.data);
+            const status = response.data.current_status;
+            const stages = response.data.stages;
+            const completedStages = stages.filter(s => s.status === 'COMPLETED').length;
+            let statusMessage = `✅ Status for ${response.data.name}:\n`;
+            statusMessage += `Score: ${status.score} (${status.risk_band})\n`;
+            statusMessage += `Total Disbursed: $${status.total_disbursed.toFixed(2)}\n`;
+            statusMessage += `Stages Completed: ${completedStages} / ${stages.length}\n`;
+            statusMessage += `Contract State: ${response.data.contract_state}\n`;
+            statusMessage += `Pest Flag: ${status.pest_flag ? '⚠️ ACTIVE' : 'NO'}\n\n`;
+            
+            setChatState('AWAITING_ACTION'); // Move to general command state after status check
+            pushBotMessage(statusMessage + `\nWhat's next? Type **NEXT STAGE**, **UPLOAD**, or **STATUS**.`);
+        } catch (error) {
+            setChatState('AWAITING_COMMAND'); // Return to start on error
+            pushBotMessage("❌ Error fetching status. Have you run 'flask init-db' and is the backend running?");
+            console.error(error);
+        }
+    };
+    
+    // --- NEW MULTI-STEP REGISTRATION HANDLER ---
+    const handleRegistrationSteps = async (input) => {
+        let nextState = chatState;
+        let botMessage = '';
+        let currentData = { ...registrationData };
+
+        if (chatState === 'REG_AWAITING_NAME') {
+            currentData.name = input;
+            nextState = 'REG_AWAITING_PHONE';
+            botMessage = "Thank you. Now, please enter your **Phone Number** (e.g., 2547XXXXXXXX).";
+        } else if (chatState === 'REG_AWAITING_PHONE') {
+            currentData.phone = input;
+            nextState = 'REG_AWAITING_CROP';
+            botMessage = "Got it. What **Crop** will you be growing this season (e.g., Maize, Beans)?";
+        } else if (chatState === 'REG_AWAITING_CROP') {
+            currentData.crop = input;
+            nextState = 'REG_AWAITING_LAND_SIZE';
+            botMessage = "And finally, what is your **Land Size** in hectares (e.g., 5.0)?";
+        } else if (chatState === 'REG_AWAITING_LAND_SIZE') {
+            const landSize = parseFloat(input);
+            if (isNaN(landSize) || landSize <= 0) {
+                pushBotMessage("Invalid land size. Please enter a positive number (e.g., 5.0).");
+                return;
+            }
+            currentData.land_size = landSize;
+            nextState = 'AWAITING_ACTION'; // Registration complete, transition to general action state
+            
+            // --- FINAL API CALL ---
+            try {
+                // Mock additional data for full registration based on your backend expectations
+                const finalData = { 
+                    ...currentData,
+                    id_document: 'IDMock', gender: 'Mock', age: 30 
+                };
+                
+                const response = await axios.post(`${API_BASE_URL}/api/farmer/register`, finalData); 
+                const newFarmerId = response.data.farmer_id;
+                setFarmerId(newFarmerId);
+                
+                pushBotMessage(`✅ Registration successful! Your Farmer ID is ${newFarmerId}. You can now use commands: **STATUS**, **NEXT STAGE**, **UPLOAD**.`);
+                await fetchStatus(newFarmerId); // Fetch initial status immediately after registration
+            } catch (error) {
+                pushBotMessage(`❌ Registration failed: ${error.response?.data?.message || 'Check if the phone number is already in use.'}`); 
+                setChatState('AWAITING_COMMAND'); // Return to start on failure
+            }
+            // --- END FINAL API CALL ---
+        }
+
+        setRegistrationData(currentData);
+        setChatState(nextState);
+        if (botMessage) {
+            pushBotMessage(botMessage);
+        }
+    };
+    // --- END NEW MULTI-STEP REGISTRATION HANDLER ---
+
+
+    // --- MAIN INPUT HANDLER (REPLACES LINES 43-56) ---
+    const handleInput = async (e) => {
+        e.preventDefault();
+        const userText = input.trim();
+        const command = userText.toUpperCase();
+        pushUserMessage(userText);
+        setInput('');
+
+        // 1. Handle command RESET globally
+        if (command === 'RESET') {
+            setChatState('AWAITING_COMMAND');
+            setFarmerId(null);
+            setRegistrationData({});
+            pushBotMessage("Chat state reset. Please type **STATUS**, **REGISTER**, or **HELP** to begin.");
+            return;
+        }
+        
+        // 2. Initial Command Check (AWAITING_COMMAND) - CRITICAL FIX
+        if (chatState === 'AWAITING_COMMAND') {
+            if (command === 'STATUS') {
+                setChatState('AWAITING_FARMER_ID');
+                pushBotMessage("Please enter your **Farmer ID** to check your status.");
+                return;
+            } else if (command === 'REGISTER') {
+                setChatState('REG_AWAITING_NAME');
+                setRegistrationData({});
+                pushBotMessage("To start registration, please enter your **Full Name**.");
+                return;
+            } else if (command === 'HELP') {
+                 pushBotMessage("You can use **STATUS** to check your loan status, **REGISTER** to sign up for a new account, or **RESET** to restart the conversation.");
+                 return;
+            }
+             pushBotMessage(`Unrecognized command: ${userText}. Please type **STATUS**, **REGISTER**, or **HELP**.`);
+             return;
+        }
+
+        // 3. Status Flow: Awaiting Farmer ID input
+        if (chatState === 'AWAITING_FARMER_ID') {
+            const inputId = parseInt(userText);
+            if (!isNaN(inputId) && inputId > 0) {
+                setFarmerId(inputId);
+                setChatState('AWAITING_ACTION'); // Transition to general action state
+                await fetchStatus(inputId); 
+            } else {
+                pushBotMessage("Invalid Farmer ID. Please enter a number.");
+            }
+            return;
+        }
+
+        // 4. Registration Flow: Awaiting multi-step inputs
+        if (chatState.startsWith('REG_')) {
+            await handleRegistrationSteps(userText);
+            return;
+        }
+        
+        // 5. Existing specialized handlers (Upload/IoT data input)
+        if (showUploadInput) {
+            handleFileUpload(userText); 
+            setShowUploadInput(false);
+            return;
+        }
+
+        if (showIoTInput) {
+            handleIotData(userText);
+            setShowIoTInput(false);
+            return;
+        }
+
+        // 6. General Command Switch (AWAITING_ACTION state)
+        switch (command) {
+            case 'STATUS':
+                fetchStatus(farmerId);
+                break;
+            
+            case 'NEXT STAGE':
+                handleNextStage();
+                break;
+                
+            case 'UPLOAD':
+                await initiateUpload();
+                break;
+
+            case 'TRIGGER PEST': // Hidden command for demo purposes
+                handlePestTrigger();
+                break;
+
+            case 'TRIGGER INSURANCE': // Hidden command for demo purposes
+                handleInsuranceTrigger();
+                break;
+
+            case 'INGEST IOT': // Hidden command for demo purposes
+                setShowIoTInput(true);
+                pushBotMessage("Please enter mock IoT data (e.g., pH 6.8, Moisture 20, Temp 30) or type 'CANCEL'.");
+                break;
+            case 'BACK':
+                setView('welcome');
+                break;
+            default:
+                pushBotMessage("I didn't understand that. Please try **STATUS**, **NEXT STAGE**, **UPLOAD**, or **BACK**.");
+        }
+    };
+    // --- END MAIN INPUT HANDLER ---
+
+
+    // --- UPLOAD HANDLERS (Keep existing logic) ---
+    
+    // Mapping acceptable formats to stages (FIX for Upload Message Clarity)
+    const stageFileFormats = {
+        1: '.csv (Soil Test Data)',
+        2: '.jpg, .jpeg, .png, .pdf (Input Purchase Evidence)',
+        3: '.pdf (Insurance Premium Proof)',
+        4: '.jpg, .jpeg, .png, .pdf (Weeding/Maintenance Photo)',
+        6: '.jpg, .jpeg, .png, .pdf (Harvest Photo)',
+        7: '.jpg, .jpeg, .png, .pdf (Transport/Marketing Proof)',
+    };
+    const initiateUpload = async () => {
+        if (!farmerStatus) {
+            await fetchStatus();
+            if (!farmerStatus) {
+                 pushBotMessage("Please check **STATUS** first.");
+                 return;
+            }
+        }
+        
+        const nextStage = farmerStatus.stages.find(s => s.status === 'UNLOCKED' || s.status === 'PENDING');
+        if (!nextStage) {
+            pushBotMessage("All stages are either COMPLETED or LOCKED. No upload required now.");
+            return;
+        }
+        
+        // Conditional Stage 5 logic check
+        if (nextStage.stage_number === 5) {
+            if (farmerStatus.current_status.pest_flag) {
+                pushBotMessage(`Stage 5: Pest/Disease (Conditional) is UNLOCKED due to a pest event. Please submit the **Inputs/Invoice Photo** for this disbursement.`);
+            } else {
+                 pushBotMessage("Stage 5 (Pest/Disease) is LOCKED and requires an event trigger first. Please continue to the next available stage or check **STATUS**.");
+                 return;
+            }
+        }
+
+        setShowUploadInput(true);
+        const formatInfo = stageFileFormats[nextStage.stage_number] || '.jpg, .pdf';
+        
+        let uploadInstructions = `
+            Stage ${nextStage.stage_number}: ${nextStage.stage_name} is UNLOCKED.
+            Please enter the **file name** and **file type** separated by a comma, e.g., 'Soil_Report.csv'.
+            **Acceptable formats for Stage ${nextStage.stage_number}:** ${formatInfo}.
+            Type 'CANCEL' to abort.
+        `;
+        pushBotMessage(uploadInstructions);
+    };
+
+    const handleFileUpload = async (fileInput) => {
+        const [fileName, fileType] = fileInput.split(',').map(s => s.trim());
+        if (fileName.toUpperCase() === 'CANCEL') {
+            pushBotMessage("Upload cancelled. What's next? **STATUS** or **NEXT STAGE**.");
+            return;
+        }
+        
+        if (!fileName || !fileType) {
+            pushBotMessage("Invalid format. Please enter file name and type, e.g., 'Photo_1.jpg'. Try **UPLOAD** again.");
+            return;
+        }
+
+        const nextStage = farmerStatus.stages.find(s => s.status === 'UNLOCKED' || s.status === 'PENDING');
+        if (!nextStage) return; 
+
+        // Mock Soil Test Data (for stage 1)
+        const soilData = nextStage.stage_number === 1 ?
+        { ph: 6.8, nitrogen: 30, moisture: 25 } : {};
+        
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/farmer/${farmerId}/upload`, {
+                stage_number: nextStage.stage_number,
+                file_type: fileType,
+                file_name: fileName,
+                soil_data: soilData 
+            });
+            pushBotMessage(`✅ ${response.data.message} Status updated to PENDING for Field Officer approval. Type **STATUS** to view score update.`);
+        } catch (error) {
+            pushBotMessage(`❌ Upload failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+    
+    // --- COMMAND HANDLERS (Keep existing logic, remove old handleRegistration) ---
+
+    // Removed old handleRegistration (replaced by handleRegistrationSteps)
+
+    const handleNextStage = async () => {
+        // Mock API call to manually trigger non-upload stages like Stage 3 (Insurance)
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/farmer/${farmerId}/trigger`);
+            pushBotMessage(`✅ ${response.data.message} Type **STATUS** to check for updates.`);
+        } catch (error) {
+            pushBotMessage(`Stage trigger failed: ${error.response?.data?.message || error.message}. Check **STATUS** to see if a file **UPLOAD** is required.`);
+        }
+    };
+
+    const handlePestTrigger = async () => {
+        // Hidden command for Field Officer/IoT mock trigger
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/field-officer/trigger_pest/${farmerId}`);
+            pushBotMessage(`✅ ${response.data.message}`);
+        } catch (error) {
+             pushBotMessage(`❌ Pest trigger failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const handleInsuranceTrigger = async () => {
+        // Hidden command for Insurer mock trigger (simulating drought check)
+         try {
+            const response = await axios.post(`${API_BASE_URL}/api/insurer/trigger/${farmerId}`, { rainfall: 5 });
+            pushBotMessage(`✅ ${response.data.message}`);
+        } catch (error) {
+             pushBotMessage(`❌ Insurance trigger failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const handleIotData = async (dataInput) => {
+         if (dataInput.toUpperCase() === 'CANCEL') {
+            pushBotMessage("IoT data ingestion cancelled. What's next? **STATUS** or **NEXT STAGE**.");
+            return;
+        }
+
+        // Mock parsing "pH 6.8, Moisture 20, Temp 30"
+        const data = dataInput.split(',').reduce((acc, part) => {
+            const [key, value] = part.trim().split(' ');
+            if (key && value) {
+                 acc[key.toLowerCase()] = parseFloat(value);
+            }
+            return acc;
+        }, {});
+        
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/iot/ingest`, data);
+            pushBotMessage(`✅ ${response.data.message} Type **STATUS** to check for updates.`);
+        } catch (error) {
+             pushBotMessage(`❌ IoT ingestion failed: ${error.response?.data?.message || error.message}`);
+        }
+    };
+    
+    // --- INITIALIZATION ---
+    useEffect(() => {
+        // Initial welcome message
+        pushBotMessage(`Welcome to the GENFIN 🌱 Africa Demo. Please **REGISTER** to start or type **STATUS** if you are Farmer ID 1 (Aisha Abdalla).`);
+    }, []);
+    
+    // --- RENDER ---
+    return (
+        <div className="chatbot-container">
+            <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+            <h2>Farmer Chatbot Interface</h2>
+            {farmerStatus && (
+                <FarmerDetailsCard 
+                    farmer={farmerStatus}
+                    score={farmerStatus.current_status.score}
+                    risk={farmerStatus.current_status.risk_band}
+                    xaiFactors={farmerStatus.current_status.xai_factors || []}
+                    contractHash={farmerStatus.contract_hash}
+                    contractState={farmerStatus.contract_state}
+                    stages={farmerStatus.stages}
+                />
+            )}
+            
+            <div className="chat-window">
+                {messages.map((msg, index) => (
+                    <div key={index} className={`message-row ${msg.sender}`}>
+                        {/* FIX: Use dangerouslySetInnerHTML to render HTML/Bolding */}
+                        <div className="message-bubble" dangerouslySetInnerHTML={{ __html: formatBotMessage(msg.text) }} />
+                        <span className="timestamp">{msg.timestamp}</span>
+                    </div>
+                ))}
+                <div ref={messagesEndRef} />
+            </div>
+
+            {/* Registration instruction updated to reflect current state */}
+            {chatState.startsWith('REG_') && (
+                <div className="mock-file-input">
+                    <span>Enter the requested information above to complete registration.</span>
+                </div>
+            )}
+            
+            {/* Old Registration input removed as it is now handled via main input */}
+            
+            {(showUploadInput || showIoTInput) && (
+                 <div className="mock-file-input">
+                    <label htmlFor="mock-file">Select File (Mock)</label>
+                    <input type="file" id="mock-file" disabled />
+                    <span>Specify file name and type (e.g., 'Soil_Report.csv', 'Photo.jpg').</span>
+                </div>
+            )}
+            
+            <form className="chat-input-form" onSubmit={handleInput}>
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    // Dynamic placeholder based on state
+                    placeholder={
+                        chatState.includes('REG_AWAITING_') 
+                        ? 'Enter registration data...' 
+                        : chatState === 'AWAITING_FARMER_ID' 
+                        ? 'Enter Farmer ID...' 
+                        : 'Type your command or data (STATUS, REGISTER, etc.)...'
+                    }
+                />
+                <button type="submit">Send</button>
+            </form>
+            <p className="disclaimer">For Demonstration Only.
+            Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>
+        </div>
+    );
+};
 
 
 // --- ADMIN/LENDER DASHBOARD ---
