@@ -878,12 +878,8 @@ const WelcomeScreen = ({ setView }) => (
             <button className="btn-lender" onClick={() => setView('lender')}>Lender/Admin Dashboard</button>
             <button className="btn-field-officer" onClick={() => setView('fieldOfficer')}>Field Officer Dashboard</button>
             <button className="btn-insurer" onClick={() => setView('insurer')}>Insurer Dashboard</button>
-        </div>
-        <div className="faq-button-wrapper">
-             <button className="btn-faq" onClick={() => setView('faq')}>
-                 ? Evaluator FAQ & Context
-             </button>
-        </div>
+            <button className="btn-faq-role" onClick={() => setView('faq')}>ⓘ Tester FAQ & Context</button>
+        </div> 
         <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>
     </div>
 );
