@@ -324,7 +324,7 @@ button:hover,
   margin: 8px 0;
   border-radius: 5px;
   background-color: #f7f7f7;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .stage-name {
@@ -344,3 +344,17 @@ button:hover,
   }
 }
 
+.stage-name {
+  flex: 2;
+  min-width: 120px;
+}
+
+.stage-disbursement,
+.stage-item span:last-child {
+  flex: 1;
+  min-width: 80px;
+  white-space: nowrap;
+  text-align: right;
+}
+
+  
