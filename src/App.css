@@ -357,4 +357,11 @@ button:hover,
   text-align: right;
 }
 
-  
+.stage-item span {
+  font-size: 0.85em;
+}
+
+.stage-item {
+  line-height: 1.2;
+}
+
