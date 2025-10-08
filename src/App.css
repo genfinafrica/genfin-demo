@@ -277,3 +277,6 @@ button:hover,
   display: block;
 }
 
+.farmer-status-summary {
+  font-size: 0.95em;
+}
