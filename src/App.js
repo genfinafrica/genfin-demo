@@ -27,14 +27,13 @@ const Modal = ({ show, onClose, title, children }) => {
     );
 };
 
-// --- NEW FAQ COMPONENT ---
+// --- NEW FAQ SECTION COMPONENT (Content Block) ---
 const FaqSection = () => {
     // The image you provided will be displayed using its file name/path
     const IMAGE_SRC = "1000010192.png-57a4da9c-5bf5-4b7e-8ffa-0c975e515f68"; 
 
     return (
         <div className="faq-container">
-            <h3>GENFIN-AFRICA Demo System: Evaluator FAQ</h3>
             
             {/* Introductory Text Section */}
             <div className="faq-intro">
@@ -48,13 +47,13 @@ const FaqSection = () => {
                 <summary>1. Core Solution & Value Proposition</summary>
                 <div className="faq-content">
                     <h4>Q1: What problem does GENFIN-AFRICA solve?</h4>
-                    <p><strong>A:</strong> We address the high-risk and high-collateral barrier that prevents smallholder African farmers from accessing formal financing. Traditional lenders lack reliable data on farmer performance and climate risk, leading to high interest rates or outright rejection. We de-risk lending by providing **objective, data-driven proficiency scores** and enforcing fund usage via **stage-based disbursements** managed by smart contracts.</p>
+                    <p><strong>A:</strong> We address the high-risk and high-collateral barrier that prevents smallholder African farmers from accessing formal financing. Traditional lenders lack reliable data on farmer performance and climate risk, leading to high interest rates or outright rejection. We de-risk lending by providing <strong>objective, data-driven proficiency scores</strong> and enforcing fund usage via <strong>stage-based disbursements</strong> managed by smart contracts.</p>
 
                     <h4>Q2: What is the Farmer Proficiency Score (FPS)?</h4>
                     <p><strong>A:</strong> The FPS is an AI-driven score that predicts a farmer's likelihood of successful yield. It moves beyond traditional credit history and collateral by analyzing farm inputs, soil health, satellite weather data, and real-time farming practices (verified through the Field Officer). A higher FPS unlocks eligibility for financing and insurance.</p>
 
                     <h4>Q3: What role does blockchain play?</h4>
-                    <p><strong>A:</strong> The system uses a **smart contract simulation** to manage the financing lifecycle. Each stage disbursement is recorded on the simulated ledger, providing an **immutable audit trail** and ensuring that funds are released only when the pre-agreed milestone is met. This replaces manual, trust-based approvals with automated, code-based execution.</p>
+                    <p><strong>A:</strong> The system uses a <strong>smart contract simulation</strong> to manage the financing lifecycle. Each stage disbursement is recorded on the simulated ledger, providing an <strong>immutable audit trail</strong> and ensuring that funds are released only when the pre-agreed milestone is met. This replaces manual, trust-based approvals with automated, code-based execution.</p>
                 </div>
             </details>
 
@@ -62,13 +61,13 @@ const FaqSection = () => {
                 <summary>2. Demo Flows and Testing Instructions</summary>
                 <div className="faq-content">
                     <h4>Q4: How do I test the end-to-end financing flow?</h4>
-                    <p><strong>A:</strong> The demo is driven by user roles, simulating a full crop cycle across multiple stages: 1. **Start (Farmer Chatbot Mock):** Simulate initial onboarding. 2. **Lender/Admin Dashboard:** Monitor portfolio and see the initial **AI Score**. 3. **Field Officer Dashboard:** This is the *trigger point*. Use this dashboard to **verify a milestone** (e.g., confirming *Soil Test Completed*). 4. **Insurer Dashboard:** Monitor policy status and view how **event triggers** affect the policy.</p>
+                    <p><strong>A:</strong> The demo is driven by user roles, simulating a full crop cycle across multiple stages: 1. <strong>Start (Farmer Chatbot Mock):</strong> Simulate initial onboarding. 2. <strong>Lender/Admin Dashboard:</strong> Monitor portfolio and see the initial <strong>AI Score</strong>. 3. <strong>Field Officer Dashboard:</strong> This is the <em>trigger point</em>. Use this dashboard to <strong>verify a milestone</strong> (e.g., confirming <em>Soil Test Completed</em>). 4. <strong>Insurer Dashboard:</strong> Monitor policy status and view how <strong>event triggers</strong> affect the policy.</p>
 
                     <h4>Q5: How is the Stage-Based Disbursement system demonstrated?</h4>
-                    <p><strong>A:</strong> Stages are sequential. You will observe the <code>Contract State</code> on the dashboards change from one stage to the next **only** after the Field Officer confirms the preceding milestone. This demonstrates the core principle: **Verification precedes Disbursement**.</p>
+                    <p><strong>A:</strong> Stages are sequential. You will observe the <code>Contract State</code> on the dashboards change from one stage to the next <strong>only</strong> after the Field Officer confirms the preceding milestone. This demonstrates the core principle: <strong>Verification precedes Disbursement</strong>.</p>
                     
                     <h4>Q6: How do I view the AI-driven decisions (XAI)?</h4>
-                    <p><strong>A:</strong> On the dashboards, clicking the **"View XAI Factors"** button will open a modal detailing the **Explainable AI (XAI)** factors that contributed to that farmer's proficiency score and risk assessment.</p>
+                    <p><strong>A:</strong> On the dashboards, clicking the <strong>"View XAI Factors"</strong> button will open a modal detailing the <strong>Explainable AI (XAI)</strong> factors that contributed to that farmer's proficiency score and risk assessment.</p>
                 </div>
             </details>
 
@@ -91,7 +90,8 @@ const FaqSection = () => {
         </div>
     );
 };
-// --- END NEW FAQ COMPONENT ---
+// --- END FAQ SECTION COMPONENT ---
+        
     
 // --- NEW FAQ CARD COMPONENT ---
 const FaqCard = ({ setView }) => (
@@ -582,6 +582,23 @@ const FarmerChatbotMock = ({ setView }) => {
     );
 };
 
+// --- NEW FAQ DASHBOARD COMPONENT (The Dedicated Page Structure) ---
+const FaqDashboard = ({ setView }) => (
+    // Uses the same outer container as the other dashboards
+    <div className="dashboard-list-container">
+        <div className="dashboard-header">
+            <h2>Evaluator FAQ & System Context</h2>
+            <button className="btn-back" onClick={() => setView('welcome')}>
+                ← Back to Roles
+            </button>
+        </div>
+        {/* The content goes here */}
+        <FaqSection /> 
+    </div>
+);
+// --- END NEW FAQ DASHBOARD COMPONENT ---
+
+
 // --- ADMIN/LENDER DASHBOARD ---
 const LenderDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
@@ -894,7 +911,7 @@ const App = () => {
             {view === 'lender' && <LenderDashboard setView={setView} />}
             {view === 'fieldOfficer' && <FieldOfficerDashboard setView={setView} />}
             {view === 'insurer' && <InsurerDashboard setView={setView} />} 
-            {view === 'faq' && <FaqCard setView={setView} />}
+            {view === 'faq' && <FaqDashboard setView={setView} />}
         </div>
     );
 };
