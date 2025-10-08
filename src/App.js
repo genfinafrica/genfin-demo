@@ -65,7 +65,7 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                 >
                     <span className="stage-name">{stage.stage_name}</span>
                     <span className="stage-disbursement">${stage.disbursement_amount.toFixed(2)}</span>
-                    <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
+                    <span className="stage-status">{stage.status}</span>
                 </div>
             ))}
 
