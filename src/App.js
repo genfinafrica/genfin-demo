@@ -140,32 +140,24 @@ const FarmerChatbotMock = ({ setView }) => {
     };
 
     const formatBotMessage = (text) => {
-        const regex = new RegExp(
-  `\\b(${[
-    'STATUS',
-    'REGISTER',
-    'HELP',
-    'RESET',
-    'NEXT STAGE',
-    'NEXT',
-    'UPLOAD',
-    'IOT',
-    'CANCEL',
-    'TRIGGER PEST',
-    'TRIGGER INSURANCE',
-    'INGEST IOT',
-    'Full Name',
-    'Phone Number',
-    'Age',
-    'Gender',
-    'ID Document',
-    'Next of Kin',
-    'Crop',
-    'Land Size'
-  ].join('|')})\\b`, 'gi'
-);
-return text.replace(regex, (match) => `<strong>${match}</strong>`);        
-    };
+  const commands = [
+    'STATUS', 'REGISTER', 'HELP', 'RESET', 'NEXT', 'NEXT STAGE',
+    'UPLOAD', 'IOT', 'CANCEL', 'TRIGGER PEST', 'TRIGGER INSURANCE',
+    'INGEST IOT', 'FULL NAME', 'PHONE NUMBER', 'AGE', 'GENDER',
+    'ID DOCUMENT', 'NEXT OF KIN', 'CROP', 'LAND SIZE'
+  ];
+
+  return text
+    .split(/(\s+)/) // Preserve spaces
+    .map((word) => {
+      const clean = word.replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase();
+      if (commands.includes(clean)) {
+        return `<strong>${word}</strong>`;
+      }
+      return word;
+    })
+    .join('');
+};
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
