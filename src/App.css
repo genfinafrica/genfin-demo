@@ -257,14 +257,23 @@ button:hover,
 }
 
 .farmer-status-summary {
+  display: flex;
   flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.farmer-status-summary > div {
+  flex: 1 1 300px;
+  min-width: 250px;
   word-break: break-word;
 }
 
-.farmer-status-summary strong {
-  display: block;
+.farmer-status-summary strong,
+.farmer-status-summary span {
   word-break: break-word;
   overflow-wrap: anywhere;
-  max-width: 100%;
+  display: block;
 }
 
