@@ -330,7 +330,7 @@ button:hover,
 .stage-name {
   word-break: break-word;
   overflow-wrap: anywhere;
-  align-text: center
+  text-align: center
 }
 
 .stage-disbursement,
