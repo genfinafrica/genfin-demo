@@ -130,9 +130,9 @@ const FarmerChatbotMock = ({ setView }) => {
     const messagesEndRef = useRef(null);
 
     const stageFileHints = {
-        1: 'Soil test (CSV / PDF / JPG)',
+        1: 'Soil test (CSV)',
         2: 'Input supplier invoice (PDF / JPG)',
-        3: 'Insurance: soil sensor CSV or premium receipt',
+        3: 'Insurance: premium receipt (PDF / JPG)',
         4: 'Weeding photo (JPG / PNG)',
         5: 'Pest photo (JPG) or type NO PEST',
         6: 'Packaging photo (JPG / PNG)',
@@ -243,7 +243,7 @@ const FarmerChatbotMock = ({ setView }) => {
         if (chatState === 'REG_AWAITING_NAME') {
             currentData.name = inputText;
             nextState = 'REG_AWAITING_PHONE';
-            botMessage = "Thanks. Now enter your **Phone Number** (e.g., 2547XXXXXXXX).";
+            botMessage = "Thanks! Now enter your **Phone Number** (e.g., +27 72 XXX XXXXX).";
         } else if (chatState === 'REG_AWAITING_PHONE') {
             currentData.phone = inputText;
             nextState = 'REG_AWAITING_AGE';
@@ -451,7 +451,7 @@ const FarmerChatbotMock = ({ setView }) => {
     };
 
     useEffect(() => {
-        pushBotMessage("Welcome to the GENFIN 🌱 demo. Type **REGISTER** to sign up or **STATUS** if you have a Farmer ID.");
+        pushBotMessage("Welcome to the GENFIN 🌱 demo. I am your financing assistant. Type **REGISTER** to sign up or **STATUS** if you have a Farmer ID.");
     }, []);
 
     return (
