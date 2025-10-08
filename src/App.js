@@ -144,7 +144,8 @@ const FarmerChatbotMock = ({ setView }) => {
     'STATUS', 'REGISTER', 'HELP', 'RESET', 'NEXT', 'NEXT STAGE',
     'UPLOAD', 'IOT', 'CANCEL', 'TRIGGER PEST', 'TRIGGER INSURANCE',
     'INGEST IOT', 'FULL NAME', 'PHONE NUMBER', 'AGE', 'GENDER',
-    'ID DOCUMENT', 'NEXT OF KIN', 'CROP', 'LAND SIZE'
+    'ID DOCUMENT', 'NEXT OF KIN', 'CROP', 'LAND SIZE', 'STAGE', '1', 
+    '2', '3', '4', '5', '6', '7', '8', '9', '0'
   ];
 
   return text
