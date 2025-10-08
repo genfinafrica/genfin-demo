@@ -354,8 +354,8 @@ button:hover,
 }
 
 .btn-view {
-  min-width: 100px;
-  max-width: 100px;
+  min-width: 70px;
+  max-width: 70px;
   padding: 6px 10px;
   font-size: 0.75em;
   white-space: nowrap;
