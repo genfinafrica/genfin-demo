@@ -256,5 +256,15 @@ button:hover,
   font-weight: bold;
 }
 
+.farmer-status-summary {
+  flex-wrap: wrap;
+  word-break: break-word;
+}
 
+.farmer-status-summary strong {
+  display: block;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
 
