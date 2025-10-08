@@ -64,6 +64,7 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                     className={`stage-item stage-${stage.status.toLowerCase()}`}
                 >
                     <span className="stage-name">{stage.stage_name}</span>
+                    <div className="stage-meta">
                     <span className="stage-disbursement">${stage.disbursement_amount.toFixed(2)}</span>
                     <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
                 </div>
