@@ -300,37 +300,29 @@ button:hover,
   gap: 15px;
 }
 
-.farmer-card .btn-view,
-.farmer-card .btn-report {
-  min-width: 100px; 
-  /* max-width is removed entirely */
-  text-align: center;
-  font-size: 0.9em; /* A readable size */
-  padding: 8px 12px; 
-  white-space: nowrap; 
-}
-
-/* This targets the container holding the shifting text and the View Policy button. */
-.farmer-card > div:last-child {
-  /* NOTE: I am using the existing selector from your App.css snippet 
-     to target the last division in the farmer-card, which appears to be the action row. */
+/* REVISED FIX: Targets the direct container of the shifting status text and the action button. */
+.farmer-card > div.farmer-card-details + div { 
+    /* This selects the <div> that comes immediately after the main details div. */
     display: flex;
-    /* Pushes the first item (text) to the start and the last item (button) to the end */
+    /* Pushes the status text to the left and the button to the right */
     justify-content: space-between; 
-    align-items: center; /* Vertically centers the text and the button */
-    padding: 10px 0; 
+    align-items: center; /* Vertically centers the items */
+    padding: 10px 15px; /* Add horizontal padding to look cleaner */
+    border-top: 1px solid #eee; /* Maintain the dividing line */
 }
 
-/* Ensure the button does not shrink or move */
-.farmer-card .btn-view {
-    flex-shrink: 0;
-}
-
-/* Ensure the status text element takes the remaining space */
-.farmer-card > div:last-child p {
+/* Ensure the status text element takes the remaining space and pushes the button */
+.farmer-card > div.farmer-card-details + div p,
+.farmer-card > div.farmer-card-details + div span { /* Targeting <p> or <span> elements holding the status */
     flex-grow: 1; 
     margin: 0;
-    padding-right: 15px; /* Add space between the text and the button */
+    padding-right: 15px; /* Adds space between the text and the button */
+    /* If the text is wrapping, setting a max-width here can also help, but flex-grow should be enough */
+}
+
+/* Ensure the button stays locked in place */
+.farmer-card > div.farmer-card-details + div .btn-view {
+    flex-shrink: 0;
 }
 
 
