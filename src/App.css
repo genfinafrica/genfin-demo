@@ -387,10 +387,10 @@ button:hover,
   .stage-status {
     text-align: left;
     margin-top: 4px;
-  }
+   }
   }
 
-.stage-item {
+ .stage-item {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: start;
