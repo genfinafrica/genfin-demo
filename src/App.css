@@ -377,15 +377,3 @@ button:hover,
   text-align: right;
   align-self: start;
 }
-
-@media (max-width: 500px) {
-  .stage-item {
-    grid-template-columns: 1fr;
-  }
-
-  .stage-disbursement,
-  .stage-status {
-    text-align: left;
-    margin-top: 4px;
-  }
-}
