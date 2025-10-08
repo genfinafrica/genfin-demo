@@ -4,10 +4,10 @@ import axios from 'axios';
 import './App.css';
 
 // Ensure this matches the URL where your Flask backend is running
-const API_BASE_URL = process.env.REACT_APP_API_URL || [span_0](start_span)'http://127.0.0.1:5000';[span_0](end_span)
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
 
 // This is a placeholder for your logo source
-[span_1](start_span)const LOGO_SRC = "https://lh3.googleusercontent.com/d/1JWvtX4b24wt5vRGmhYsUW029NS0grXOq";[span_1](end_span)
+const LOGO_SRC = "https://lh3.googleusercontent.com/d/1JWvtX4b24wt5vRGmhYsUW029NS0grXOq";
 
 // --- UTILITY COMPONENTS ---
 
