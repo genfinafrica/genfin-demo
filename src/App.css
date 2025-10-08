@@ -252,3 +252,22 @@ button:hover,
     display: inline;
 }
 
+.message-bubble strong {
+  font-weight: bold;
+  color: #007bff;
+}
+
+/* Prevent partial bolding inside other words like "Stage" */
+.message-bubble strong:only-child,
+.message-bubble strong:empty,
+.message-bubble strong:before,
+.message-bubble strong:after {
+  font-weight: bold;
+  color: #007bff;
+}
+
+/* If <strong> is inside a word, reset it */
+.message-bubble strong:not(:only-child) {
+  font-weight: inherit;
+  color: inherit;
+}
