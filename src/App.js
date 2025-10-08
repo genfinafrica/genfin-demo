@@ -953,7 +953,7 @@ const WelcomeScreen = ({ setView }) => (
     <div className="welcome-container">
         <img src={LOGO_SRC} alt="eSusFarm Africa Logo" className="esusfarm-logo" />
         <h2>GENFIN 🌱 AFRICA</h2>
-        <p><b>G20 TechSprint Demo</b></p>
+        <p><b>G20 TechSprint 2025 Demo</b></p>
         <p>Select a user role to begin the stage-based financing flow demonstration.</p>
         <div className="role-buttons">
             <button className="btn-farmer" onClick={() => setView('farmer')}>
