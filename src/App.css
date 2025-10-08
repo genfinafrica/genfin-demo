@@ -280,3 +280,22 @@ button:hover,
 .farmer-status-summary {
   font-size: 0.90em;
 }
+
+.role-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.role-buttons button {
+  min-width: 200px; /* or any fixed width you prefer */
+  flex: 1 1 200px;
+  text-align: center;
+  }
+
+.role-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
