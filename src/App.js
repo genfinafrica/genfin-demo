@@ -182,24 +182,7 @@ const FaqSection = () => {
     );
 };
 // --- END FAQ SECTION COMPONENT ---
-        
-    
-// --- NEW FAQ CARD COMPONENT ---
-const FaqCard = ({ setView }) => (
-    <div className="faq-card-container">
-        <button className="btn-back" onClick={() => setView('welcome')}>
-            ← Back to Roles
-        </button>
-        {/* Reuse the FaqSection content here */}
-        <FaqSection /> 
-    </div>
-);
-// --- End FaqCard Component ---
 
-// NOTE: Ensure the FaqSection component (from the previous response) 
-// is also included in your App.js, as the FaqCard depends on it.
-
-    
 
 // --------- Upgraded FarmerChatbotMock with insurance logic ---------
 const FarmerChatbotMock = ({ setView }) => {
