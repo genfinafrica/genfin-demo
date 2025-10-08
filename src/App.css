@@ -299,3 +299,18 @@ button:hover,
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
 }
+
+.farmer-card .btn-view,
+.farmer-card .btn-report {
+  min-width: 140px; /* Adjust as needed */
+  max-width: 140px;
+  text-align: center;
+  padding: 10px 15px;
+  white-space: nowrap;
+}
+
+.farmer-card > div:last-child {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
