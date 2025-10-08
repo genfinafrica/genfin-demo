@@ -302,8 +302,8 @@ button:hover,
 
 .farmer-card .btn-view,
 .farmer-card .btn-report {
-  min-width: 90px; /* Adjust as needed */
-  max-width: 90px;
+  min-width: 100px; /* Adjust as needed */
+  max-width: 100px;
   text-align: center;
   font-size: 0.35em; /* try 12px for fixed size /
   padding: 6px 10px; /* 6 10 tighten
