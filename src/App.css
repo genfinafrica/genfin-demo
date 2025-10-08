@@ -344,19 +344,6 @@ button:hover,
   }
 }
 
-.stage-name {
-  flex: 2;
-  min-width: 120px;
-}
-
-.stage-disbursement,
-.stage-item span:last-child {
-  flex: 1;
-  min-width: 80px;
-  white-space: wrap;
-  text-align: right;
-}
-
 .stage-item span {
   font-size: 0.65em;
 }
