@@ -212,6 +212,20 @@ button:hover,
 .modal-content th {
     background-color: #f2f2f2;
 }
+.modal-content th, 
+.modal-content td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    /* FIX 1: Allow long words (like hashes) to break and wrap */
+    word-break: break-all;
+    /* FIX 2: Ensure the table layout is constrained to the container */
+    word-wrap: break-word; 
+}
+.modal-content th {
+    background-color: #f2f2f2;
+  }
+
 
 /* --- FIX: Insurer/Policy Styling --- */
 .policy-card {
@@ -238,20 +252,3 @@ button:hover,
     display: inline;
 }
 
-.modal-content table {
-    width: 100%;
-    /* ... (rest of your styles) ... */
-}
-.modal-content th, 
-.modal-content td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-    /* FIX 1: Allow long words (like hashes) to break and wrap */
-    word-break: break-all;
-    /* FIX 2: Ensure the table layout is constrained to the container */
-    word-wrap: break-word; 
-}
-.modal-content th {
-    background-color: #f2f2f2;
-}
