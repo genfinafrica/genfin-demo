@@ -39,7 +39,7 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
 
     return (
         <div className="tracker-box">
-            <h3>Farmer Tracker: {farmer.name} (ID: {farmer.farmer_id})</h3>
+            <h4>Farmer Tracker: {farmer.name} (ID: {farmer.farmer_id})</h4>
             <div className="farmer-status-summary" style={{ display: 'flex', justifyContent: 'space-around', margin: '20px 0' }}>
                 <div style={{ padding: '10px', borderRight: '1px solid #ddd' }}>
                     <strong>Score: {score}</strong> <br />
