@@ -302,13 +302,34 @@ button:hover,
 
 .farmer-card .btn-view,
 .farmer-card .btn-report {
-  min-width: 100px; /* Adjust as needed */
-  max-width: 100px;
+  min-width: 100px; 
+  /* max-width is removed entirely */
   text-align: center;
-  font-size: 5px; 
-  padding: 10px 15px; 
-  white-space: nowrap;
+  font-size: 0.9em; /* A readable size */
+  padding: 8px 12px; 
+  white-space: nowrap; 
 }
+
+/* Fixes the shifting button by using Flexbox to align elements to opposite ends */
+.farmer-card-status { 
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; /* Pushes text left, button right */
+    padding: 10px 0; 
+}
+
+/* Ensure the status text can use the space */
+.farmer-card-status p {
+    flex-grow: 1; 
+    margin: 0;
+    padding-right: 15px; /* Space between text and button */
+}
+
+/* Ensure the button does not shrink */
+.farmer-card-status button {
+    flex-shrink: 0;
+}
+
 
 .farmer-card > div:last-child {
   display: flex;
