@@ -315,3 +315,26 @@ button:hover,
   flex-wrap: wrap;
 }
 
+.stage-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 5px;
+  background-color: #f7f7f7;
+  flex-wrap: wrap;
+}
+
+.stage-name {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.stage-disbursement,
+.stage-status {
+  white-space: nowrap;
+  text-align: right;
+}
+
