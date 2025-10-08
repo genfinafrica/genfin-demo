@@ -335,7 +335,7 @@ button:hover,
 .stage-disbursement,
 .stage-status {
   white-space: wrap;
-  text-align: right;
+  text-align: center;
 }
 
 @media (max-width: 500px) {
@@ -345,10 +345,10 @@ button:hover,
 }
 
 .stage-item span {
-  font-size: 0.65em;
+  font-size: 0.75em;
 }
 
 .stage-item {
-  line-height: 1;
+  line-height: 1.2;
 }
 
