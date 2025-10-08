@@ -93,6 +93,21 @@ const FaqSection = () => {
 };
 // --- END NEW FAQ COMPONENT ---
     
+// --- NEW FAQ CARD COMPONENT ---
+const FaqCard = ({ setView }) => (
+    <div className="faq-card-container">
+        <button className="btn-back" onClick={() => setView('welcome')}>
+            ← Back to Roles
+        </button>
+        {/* Reuse the FaqSection content here */}
+        <FaqSection /> 
+    </div>
+);
+// --- End FaqCard Component ---
+
+// NOTE: Ensure the FaqSection component (from the previous response) 
+// is also included in your App.js, as the FaqCard depends on it.
+
 
 // --- DASHBOARD COMPONENTS ---
 
@@ -864,8 +879,12 @@ const WelcomeScreen = ({ setView }) => (
             <button className="btn-field-officer" onClick={() => setView('fieldOfficer')}>Field Officer Dashboard</button>
             <button className="btn-insurer" onClick={() => setView('insurer')}>Insurer Dashboard</button>
         </div>
-        <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>  
-        <FaqSection />
+        <div className="faq-button-wrapper">
+             <button className="btn-faq" onClick={() => setView('faq')}>
+                 ? Evaluator FAQ & Context
+             </button>
+        </div>
+        <p className="disclaimer">For Demonstration Only. Powered by <a href="https://esusfarm.africa/home" target="_blank" rel="noopener noreferrer">eSusFarm Africa.</a></p>
     </div>
 );
 
@@ -878,7 +897,8 @@ const App = () => {
             {view === 'farmer' && <FarmerChatbotMock setView={setView} />}
             {view === 'lender' && <LenderDashboard setView={setView} />}
             {view === 'fieldOfficer' && <FieldOfficerDashboard setView={setView} />}
-            {view === 'insurer' && <InsurerDashboard setView={setView} />}
+            {view === 'insurer' && <InsurerDashboard setView={setView} />} 
+            {view === 'faq' && <FaqCard setView={setView} />}
         </div>
     );
 };
