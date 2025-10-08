@@ -27,87 +27,6 @@ const Modal = ({ show, onClose, title, children }) => {
     );
 };
 
-// --- NEW FAQ SECTION COMPONENT (Content Block) ---
-const FaqSection = () => {
-    // The image you provided will be displayed using its file name/path
-    const IMAGE_SRC = "1000010192.png-57a4da9c-5bf5-4b7e-8ffa-0c975e515f68"; 
-
-    return (
-        <div className="faq-container">
-            
-            {/* Introductory Text Section */}
-            <div className="faq-intro">
-                <img src={IMAGE_SRC} alt="eSusFarm Stage-Based Financing Workflow" className="faq-image" />
-                <p>
-                    <strong>eSusFarm introduces a new model of climate-smart financing by linking farm productivity, data, and financial access through AI and blockchain.</strong> Unlike traditional microfinance or insurance models that require collateral or credit history, our platform uses farmer proficiency scores—derived from soil health, weather, and farming behaviour—to unlock stage-based financing. Each disbursement is automated through smart contracts, triggered only when verified milestones (e.g., soil testing, planting) are met. This ensures funds are used productively while reducing default risk without needing collateral. The innovation lies in merging decentralized trust, real-time data, and inclusive design to de-risk agricultural lending. Farmers don’t just receive aid—they build digital credit identities that enable long-term financial inclusion and resilience across Africa’s most vulnerable communities.
-                </p>
-            </div>
-            
-            <details className="faq-details">
-                <summary>1. Core Solution & Value Proposition</summary>
-                <div className="faq-content">
-                    <h4>Q1: What problem does GENFIN-AFRICA solve?</h4>
-                    <p><strong>A:</strong> We address the high-risk and high-collateral barrier that prevents smallholder African farmers from accessing formal financing. Traditional lenders lack reliable data on farmer performance and climate risk, leading to high interest rates or outright rejection. We de-risk lending by providing <strong>objective, data-driven proficiency scores</strong> and enforcing fund usage via <strong>stage-based disbursements</strong> managed by smart contracts.</p>
-
-                    <h4>Q2: What is the Farmer Proficiency Score (FPS)?</h4>
-                    <p><strong>A:</strong> The FPS is an AI-driven score that predicts a farmer's likelihood of successful yield. It moves beyond traditional credit history and collateral by analyzing farm inputs, soil health, satellite weather data, and real-time farming practices (verified through the Field Officer). A higher FPS unlocks eligibility for financing and insurance.</p>
-
-                    <h4>Q3: What role does blockchain play?</h4>
-                    <p><strong>A:</strong> The system uses a <strong>smart contract simulation</strong> to manage the financing lifecycle. Each stage disbursement is recorded on the simulated ledger, providing an <strong>immutable audit trail</strong> and ensuring that funds are released only when the pre-agreed milestone is met. This replaces manual, trust-based approvals with automated, code-based execution.</p>
-                </div>
-            </details>
-
-            <details className="faq-details">
-                <summary>2. Demo Flows and Testing Instructions</summary>
-                <div className="faq-content">
-                    <h4>Q4: How do I test the end-to-end financing flow?</h4>
-                    <p><strong>A:</strong> The demo is driven by user roles, simulating a full crop cycle across multiple stages: 1. <strong>Start (Farmer Chatbot Mock):</strong> Simulate initial onboarding. 2. <strong>Lender/Admin Dashboard:</strong> Monitor portfolio and see the initial <strong>AI Score</strong>. 3. <strong>Field Officer Dashboard:</strong> This is the <em>trigger point</em>. Use this dashboard to <strong>verify a milestone</strong> (e.g., confirming <em>Soil Test Completed</em>). 4. <strong>Insurer Dashboard:</strong> Monitor policy status and view how <strong>event triggers</strong> affect the policy.</p>
-
-                    <h4>Q5: How is the Stage-Based Disbursement system demonstrated?</h4>
-                    <p><strong>A:</strong> Stages are sequential. You will observe the <code>Contract State</code> on the dashboards change from one stage to the next <strong>only</strong> after the Field Officer confirms the preceding milestone. This demonstrates the core principle: <strong>Verification precedes Disbursement</strong>.</p>
-                    
-                    <h4>Q6: How do I view the AI-driven decisions (XAI)?</h4>
-                    <p><strong>A:</strong> On the dashboards, clicking the <strong>"View XAI Factors"</strong> button will open a modal detailing the <strong>Explainable AI (XAI)</strong> factors that contributed to that farmer's proficiency score and risk assessment.</p>
-                </div>
-            </details>
-
-            <details className="faq-details">
-                <summary>3. Technical Architecture (Mock vs. Reality)</summary>
-                <div className="faq-content">
-                    <table>
-                        <thead>
-                            <tr><th>Feature</th><th>Demo Implementation</th><th>Actual Solution (BRS Goal)</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Smart Contract</td><td><strong>Mock Simulation</strong> (tracked in the SQL DB)</td><td>Live: Ethereum or Polygon Layer 2</td></tr>
-                            <tr><td>AI Scoring</td><td><strong>Mock Score</strong> based on static data.</td><td>Live: Full PyTorch/ONNX model service with real-time data.</td></tr>
-                            <tr><td>Integrations</td><td>Mock APIs and endpoints.</td><td>Live connections to MNOs (wallets), soil labs, and IoT sensors.</td></tr>
-                            <tr><td>Report Hash</td><td>Simulated <code>contractHash</code> visible on cards.</td><td>Actual cryptographic hash of the transaction/state on the blockchain.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
-    );
-};
-// --- END FAQ SECTION COMPONENT ---
-        
-    
-// --- NEW FAQ CARD COMPONENT ---
-const FaqCard = ({ setView }) => (
-    <div className="faq-card-container">
-        <button className="btn-back" onClick={() => setView('welcome')}>
-            ← Back to Roles
-        </button>
-        {/* Reuse the FaqSection content here */}
-        <FaqSection /> 
-    </div>
-);
-// --- End FaqCard Component ---
-
-// NOTE: Ensure the FaqSection component (from the previous response) 
-// is also included in your App.js, as the FaqCard depends on it.
-
 
 // --- DASHBOARD COMPONENTS ---
 
@@ -198,6 +117,89 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
         </div>
     );
 };
+
+// --- NEW FAQ SECTION COMPONENT (Content Block) ---
+const FaqSection = () => {
+    // The image you provided will be displayed using its file name/path
+    const IMAGE_SRC = "1000010192.png-57a4da9c-5bf5-4b7e-8ffa-0c975e515f68"; 
+
+    return (
+        <div className="faq-container">
+            
+            {/* Introductory Text Section */}
+            <div className="faq-intro">
+                <img src={IMAGE_SRC} alt="eSusFarm Stage-Based Financing Workflow" className="faq-image" />
+                <p>
+                    <strong>eSusFarm introduces a new model of climate-smart financing by linking farm productivity, data, and financial access through AI and blockchain.</strong> Unlike traditional microfinance or insurance models that require collateral or credit history, our platform uses farmer proficiency scores—derived from soil health, weather, and farming behaviour—to unlock stage-based financing. Each disbursement is automated through smart contracts, triggered only when verified milestones (e.g., soil testing, planting) are met. This ensures funds are used productively while reducing default risk without needing collateral. The innovation lies in merging decentralized trust, real-time data, and inclusive design to de-risk agricultural lending. Farmers don’t just receive aid—they build digital credit identities that enable long-term financial inclusion and resilience across Africa’s most vulnerable communities.
+                </p>
+            </div>
+            
+            <details className="faq-details">
+                <summary>1. Core Solution & Value Proposition</summary>
+                <div className="faq-content">
+                    <h4>Q1: What problem does GENFIN-AFRICA solve?</h4>
+                    <p><strong>A:</strong> We address the high-risk and high-collateral barrier that prevents smallholder African farmers from accessing formal financing. Traditional lenders lack reliable data on farmer performance and climate risk, leading to high interest rates or outright rejection. We de-risk lending by providing <strong>objective, data-driven proficiency scores</strong> and enforcing fund usage via <strong>stage-based disbursements</strong> managed by smart contracts.</p>
+
+                    <h4>Q2: What is the Farmer Proficiency Score (FPS)?</h4>
+                    <p><strong>A:</strong> The FPS is an AI-driven score that predicts a farmer's likelihood of successful yield. It moves beyond traditional credit history and collateral by analyzing farm inputs, soil health, satellite weather data, and real-time farming practices (verified through the Field Officer). A higher FPS unlocks eligibility for financing and insurance.</p>
+
+                    <h4>Q3: What role does blockchain play?</h4>
+                    <p><strong>A:</strong> The system uses a <strong>smart contract simulation</strong> to manage the financing lifecycle. Each stage disbursement is recorded on the simulated ledger, providing an <strong>immutable audit trail</strong> and ensuring that funds are released only when the pre-agreed milestone is met. This replaces manual, trust-based approvals with automated, code-based execution.</p>
+                </div>
+            </details>
+
+            <details className="faq-details">
+                <summary>2. Demo Flows and Testing Instructions</summary>
+                <div className="faq-content">
+                    <h4>Q4: How do I test the end-to-end financing flow?</h4>
+                    <p><strong>A:</strong> The demo is driven by user roles, simulating a full crop cycle across multiple stages: 1. <strong>Start (Farmer Chatbot Mock):</strong> Simulate initial onboarding. 2. <strong>Lender/Admin Dashboard:</strong> Monitor portfolio and see the initial <strong>AI Score</strong>. 3. <strong>Field Officer Dashboard:</strong> This is the <em>trigger point</em>. Use this dashboard to <strong>verify a milestone</strong> (e.g., confirming <em>Soil Test Completed</em>). 4. <strong>Insurer Dashboard:</strong> Monitor policy status and view how <strong>event triggers</strong> affect the policy.</p>
+
+                    <h4>Q5: How is the Stage-Based Disbursement system demonstrated?</h4>
+                    <p><strong>A:</strong> Stages are sequential. You will observe the <code>Contract State</code> on the dashboards change from one stage to the next <strong>only</strong> after the Field Officer confirms the preceding milestone. This demonstrates the core principle: <strong>Verification precedes Disbursement</strong>.</p>
+                    
+                    <h4>Q6: How do I view the AI-driven decisions (XAI)?</h4>
+                    <p><strong>A:</strong> On the dashboards, clicking the <strong>"View XAI Factors"</strong> button will open a modal detailing the <strong>Explainable AI (XAI)</strong> factors that contributed to that farmer's proficiency score and risk assessment.</p>
+                </div>
+            </details>
+
+            <details className="faq-details">
+                <summary>3. Technical Architecture (Mock vs. Reality)</summary>
+                <div className="faq-content">
+                    <table>
+                        <thead>
+                            <tr><th>Feature</th><th>Demo Implementation</th><th>Actual Solution (BRS Goal)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Smart Contract</td><td><strong>Mock Simulation</strong> (tracked in the SQL DB)</td><td>Live: Ethereum or Polygon Layer 2</td></tr>
+                            <tr><td>AI Scoring</td><td><strong>Mock Score</strong> based on static data.</td><td>Live: Full PyTorch/ONNX model service with real-time data.</td></tr>
+                            <tr><td>Integrations</td><td>Mock APIs and endpoints.</td><td>Live connections to MNOs (wallets), soil labs, and IoT sensors.</td></tr>
+                            <tr><td>Report Hash</td><td>Simulated <code>contractHash</code> visible on cards.</td><td>Actual cryptographic hash of the transaction/state on the blockchain.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+    );
+};
+// --- END FAQ SECTION COMPONENT ---
+        
+    
+// --- NEW FAQ CARD COMPONENT ---
+const FaqCard = ({ setView }) => (
+    <div className="faq-card-container">
+        <button className="btn-back" onClick={() => setView('welcome')}>
+            ← Back to Roles
+        </button>
+        {/* Reuse the FaqSection content here */}
+        <FaqSection /> 
+    </div>
+);
+// --- End FaqCard Component ---
+
+// NOTE: Ensure the FaqSection component (from the previous response) 
+// is also included in your App.js, as the FaqCard depends on it.
+
+    
 
 // --------- Upgraded FarmerChatbotMock with insurance logic ---------
 const FarmerChatbotMock = ({ setView }) => {
