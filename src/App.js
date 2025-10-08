@@ -140,7 +140,7 @@ const FarmerChatbotMock = ({ setView }) => {
     };
 
     const formatBotMessage = (text) => {
-        const regex = /(STATUS|REGISTER|HELP|RESET|NEXT STAGE|NEXT|UPLOAD|IOT|CANCEL|TRIGGER PEST|TRIGGER INSURANCE|INGEST IOT|Full Name|Phone Number|Age|Gender|ID Document|Next of Kin|Crop|Land Size)/gi;
+        const regex = /\b(STATUS|REGISTER|HELP|RESET|NEXT STAGE|NEXT|UPLOAD|IOT|CANCEL|TRIGGER PEST|TRIGGER INSURANCE|INGEST IOT|Full Name|Phone Number|Age|Gender|ID Document|Next of Kin|Crop|Land Size)/gi;
         return text.replace(regex, (match) => `<strong>${match}</strong>`);
     };
 
