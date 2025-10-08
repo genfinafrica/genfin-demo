@@ -305,7 +305,7 @@ button:hover,
   min-width: 80px; /* Adjust as needed */
   max-width: 80px;
   text-align: center;
-  font-size: 0.55em; /or try 12px for fixed size /
+  font-size: 0.55em; //try 12px for fixed size /
   padding: 6px 10px; /6 10 tighten
   white-space: nowrap;
 }
