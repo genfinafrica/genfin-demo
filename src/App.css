@@ -310,24 +310,27 @@ button:hover,
   white-space: nowrap; 
 }
 
-/* Fixes the shifting button by using Flexbox to align elements to opposite ends */
-.farmer-card-status { 
+/* This targets the container holding the shifting text and the View Policy button. */
+.farmer-card > div:last-child {
+  /* NOTE: I am using the existing selector from your App.css snippet 
+     to target the last division in the farmer-card, which appears to be the action row. */
     display: flex;
-    align-items: center; 
-    justify-content: space-between; /* Pushes text left, button right */
+    /* Pushes the first item (text) to the start and the last item (button) to the end */
+    justify-content: space-between; 
+    align-items: center; /* Vertically centers the text and the button */
     padding: 10px 0; 
 }
 
-/* Ensure the status text can use the space */
-.farmer-card-status p {
-    flex-grow: 1; 
-    margin: 0;
-    padding-right: 15px; /* Space between text and button */
+/* Ensure the button does not shrink or move */
+.farmer-card .btn-view {
+    flex-shrink: 0;
 }
 
-/* Ensure the button does not shrink */
-.farmer-card-status button {
-    flex-shrink: 0;
+/* Ensure the status text element takes the remaining space */
+.farmer-card > div:last-child p {
+    flex-grow: 1; 
+    margin: 0;
+    padding-right: 15px; /* Add space between the text and the button */
 }
 
 
