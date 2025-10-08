@@ -140,8 +140,31 @@ const FarmerChatbotMock = ({ setView }) => {
     };
 
     const formatBotMessage = (text) => {
-        const regex = /\b(STATUS|REGISTER|HELP|RESET|NEXT STAGE|NEXT|UPLOAD|IOT|CANCEL|TRIGGER PEST|TRIGGER INSURANCE|INGEST IOT|Full Name|Phone Number|Age|Gender|ID Document|Next of Kin|Crop|Land Size)\b/gi;
-        return text.replace(regex, (match) => `<strong>${match}</strong>`);
+        const regex = new RegExp(
+  `\\b(${[
+    'STATUS',
+    'REGISTER',
+    'HELP',
+    'RESET',
+    'NEXT STAGE',
+    'NEXT',
+    'UPLOAD',
+    'IOT',
+    'CANCEL',
+    'TRIGGER PEST',
+    'TRIGGER INSURANCE',
+    'INGEST IOT',
+    'Full Name',
+    'Phone Number',
+    'Age',
+    'Gender',
+    'ID Document',
+    'Next of Kin',
+    'Crop',
+    'Land Size'
+  ].join('|')})\\b`, 'gi'
+);
+return text.replace(regex, (match) => `<strong>${match}</strong>`);        
     };
 
     const scrollToBottom = () => {
