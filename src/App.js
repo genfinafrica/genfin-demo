@@ -388,15 +388,7 @@ const FarmerChatbotMock = ({ setView }) => {
                 const newFarmerId = response.data.farmer_id;
                 setFarmerId(newFarmerId);
                 const simulatedHash = '0x4A6C5D9F2B8E7A1C3F5D9B1E4A7C3F5D9B1E4A7C3F5D9B1E4A7C3F5D9B1E4A7C';
-                pushBotMessage(`✅ `
-            Thank you, ${currentData.name}! Your registration is complete. 
-            Your Farmer ID is **${newFarmerId}**. 
-            
-            🎉 **Digital Identity Created!** After registration, you are immediately issued a **Walletless Digital Hash** for tracking your finance contract: 
-            <span style="color: #007bff; font-weight: bold; word-break: break-all; display: block; margin-top: 5px;">${simulatedHash}</span>
-            
-            A Field Officer will now review your profile. Type **STATUS** to check your loan progress.
-        `);
+                pushBotMessage(`✅ Thank you, ${currentData.name}! Your registration is complete. Your Farmer ID is **${newFarmerId}**. 🎉 **Digital Identity Created!** After registration, you are immediately issued a **Walletless Digital Hash** for tracking your finance contract: <span style="color: #007bff; font-weight: bold; word-break: break-all; display: block; margin-top: 5px;">${simulatedHash}</span> A Field Officer will now review your profile. Type **STATUS** to check your loan progress.`);
                 await fetchStatus(newFarmerId);
             } catch (error) {
                 pushBotMessage(`❌ Registration failed: ${error.response?.data?.message || error.message}`);
