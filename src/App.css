@@ -496,3 +496,18 @@ button:hover,
     text-align: left;
 }
 
+/* --- FIX FOR OVERFLOWING TABLE IN FAQ --- */
+.table-scroll-wrapper {
+    /* CRITICAL: Allows the inner table to overflow the parent container's width */
+    overflow-x: auto; 
+    /* Ensures the wrapper itself uses the full available width */
+    width: 100%; 
+    margin: 15px 0; /* Ensures separation from surrounding text */
+}
+
+/* Ensure the table itself doesn't try to shrink */
+.table-scroll-wrapper table {
+    /* Prevents the browser from trying to compress the columns too much */
+    min-width: 500px; 
+    width: auto; /* Allow the table to stretch naturally */
+}
