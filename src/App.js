@@ -573,13 +573,8 @@ const FarmerChatbotMock = ({ setView }) => {
 const FaqDashboard = ({ setView }) => (
     // Uses the same outer container as the other dashboards
     <div className="dashboard-list-container">
-        <div className="dashboard-header">
-            <h2>Evaluator FAQ & System Context</h2>
-            <button className="btn-back" onClick={() => setView('welcome')}>
-                ← Back to Roles
-            </button>
-        </div>
-        {/* The content goes here */}
+        < className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+            <h2>Evaluator FAQ & System Context</h2>            
         <FaqSection /> 
     </div>
 );
@@ -620,14 +615,14 @@ const LenderDashboard = ({ setView }) => {
         }
     };
 
-    useEffect(() => {
+    useEffect(() =>button {
         fetchFarmers();
     }, []);
 
     if (!selectedFarmerId || !farmerData) {
         return (
             <div className="dashboard-list-container">
-                <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+                < className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Lender/Admin Dashboard</h2>
                 <p>Select a farmer to view progress and disburse funds.</p>
                 {farmers.map((farmer) => (
