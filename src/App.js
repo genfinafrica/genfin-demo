@@ -167,6 +167,7 @@ const FaqSection = () => {
             <details className="faq-details">
                 <summary>3. Technical Architecture (Mock vs. Reality)</summary>
                 <div className="faq-content">
+                    <div className="table-scroll-wrapper">
                     <table>
                         <thead>
                             <tr><th>Feature</th><th>Demo Implementation</th><th>Actual Solution (BRS Goal)</th></tr>
@@ -178,6 +179,7 @@ const FaqSection = () => {
                             <tr><td>Report Hash</td><td>Simulated <code>contractHash</code> visible on cards.</td><td>Actual cryptographic hash of the transaction/state on the blockchain.</td></tr>
                         </tbody>
                     </table>
+                   </div>
                 </div>
             </details>
         </div>
