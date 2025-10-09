@@ -123,53 +123,73 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
     );
 };
 
-// --- NEW CONSTANT FOR INSURER DATA MINIMALITY ---
-const INSURER_XAI_FACTORS = [
-    "Stages Completed Ratio",
-    "Land Size (Acres)",
-    "Soil Quality Score (Mock)",
-];
-
-// --- InsurerDetailsCard: Restricted View for POPIA Compliance ---
-const InsurerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, contractState, stages, contractHistory }) => {
+// --- *** NEW & FIXED *** InsurerDetailsCard with restricted view ---
+const InsurerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, contractState, stages }) => {
     const [showXaiModal, setShowXaiModal] = useState(false);
-    
-    // 1. FILTER XAI FACTORS: Filter factors to only show minimal, insurance-relevant data
-    const filteredXaiFactors = xaiFactors.filter(factor => 
-        INSURER_XAI_FACTORS.includes(factor.factor) || factor.factor === "Base Score"
+
+    // 1. Define the list of factors relevant to the insurer
+    const INSURER_XAI_FACTORS = [
+        "Base Score",
+        "Stages Completed Ratio",
+        "Land Size (Acres)",
+        "Soil Quality Score (Mock)",
+    ];
+
+    // 2. Filter the incoming xaiFactors to only include those relevant for the insurer
+    const filteredXaiFactors = xaiFactors.filter(factor =>
+        INSURER_XAI_FACTORS.includes(factor.factor)
     );
 
-    // Reverse stage order for display (latest first)
-    const reversedStages = [...stages].reverse();
-
     return (
-        <div className="farmer-card">
-            <div>
-                <h3>Farmer: {farmer.name} ({farmer.phone})</h3>
-                <p>Contract Hash: {contractHash || 'N/A'}</p>
-                <p>Current Stage: <b>{contractState}</b></p>
-                <p>Latest Policy: <span className={contractState === 'INSURANCE_PREMIUM_PAID' || contractState === 'IOT_INGESTION_STARTED' ? 'policy-status-active' : 'policy-status-pending'}>
-                    {contractState === 'INSURANCE_PREMIUM_PAID' || contractState === 'IOT_INGESTION_STARTED' ? 'Active' : 'Not Activated'}
-                </span></p>
+        <div className="tracker-box">
+            <h4>Farmer Tracker: {farmer.name} (ID: {farmer.farmer_id})</h4>
+            <div className="farmer-status-summary" style={{ display: 'flex', justifyContent: 'space-around', margin: '20px 0' }}>
+                <div style={{ padding: '10px', borderRight: '1px solid #ddd' }}>
+                    <strong>Score: {score}</strong> <br />
+                    Risk: <span style={{ color: risk === 'LOW' ? 'green' : risk === 'HIGH' ? 'red' : 'orange' }}>{risk}</span>
+                    <button className="btn-view" onClick={() => setShowXaiModal(true)} style={{ marginLeft: '10px' }}>
+                        View XAI
+                    </button>
+                </div>
+                <div style={{ padding: '10px' }}>
+                    <strong>Contract State: {contractState}</strong> <br />
+                    {/* The full contract audit trail button is removed for POPIA compliance */}
+                    <span>(Full contract log restricted)</span>
+                </div>
             </div>
 
-            <div style={{ textAlign: 'right' }}>
-                <p>AI Score: <b>{score}</b></p>
-                <p>Risk: <b style={{ color: risk === 'LOW' ? 'green' : risk === 'MEDIUM' ? 'orange' : 'red' }}>{risk}</b></p>
-                <button className="btn-view" onClick={() => setShowXaiModal(true)}>View XAI</button>
-                {/* 2. CONTRACT LOG REMOVED: The View Contract Log button is removed here 
-                    to comply with data minimality and restrict access to private loan details. */}
-            </div>
+            <h4>Relevant Stage Progress</h4>
+            {stages.map((stage) => (
+                <div
+                    key={stage.stage_number}
+                    className={`stage-item stage-${stage.status.toLowerCase()}`}
+                >
+                    <span className="stage-name">{stage.stage_name}</span>
+                    <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
+                </div>
+            ))}
 
-            <Modal
-                show={showXaiModal}
-                onClose={() => setShowXaiModal(false)}
-                title={`XAI Score Details: ${score} (${risk})`}
-            >
-                <h4>Score Factors (Filtered)</h4>
-                {/* 3. FILTERED FACTORS PASSED: Pass the restricted list to the table */}
-                <XaiFactorTable xaiFactors={filteredXaiFactors} />
-                <p>The score is calculated based on a mock Federated Learning model designed for GENFIN.</p>
+            {/* XAI Modal with FILTERED data */}
+            <Modal show={showXaiModal} onClose={() => setShowXaiModal(false)} title="AI Proficiency Score (XAI) - Insurer View">
+                <p><strong>Score: {score}</strong> | Risk Band: {risk}</p>
+                <p>Explanation of the current score based on factors relevant to insurance underwriting:</p>
+                {/* 3. This is the FIX: Use the original table structure with the filtered data */}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Factor</th>
+                            <th>Contribution (Mock)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredXaiFactors.map((f, index) => (
+                            <tr key={index}>
+                                <td>{f.factor}</td>
+                                <td>+{f.weight.toFixed(1)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
                 <p className="disclaimer">Note: Factors have been filtered to show only information relevant to insurance underwriting and risk mitigation, per data governance policy.</p>
             </Modal>
         </div>
@@ -870,50 +890,20 @@ const FieldOfficerDashboard = ({ setView }) => {
     );
 };
 
-// --- INSURER DASHBOARD ---
+
+// --- INSURER DASHBOARD (Updated to use InsurerDetailsCard) ---
 const InsurerDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmerId, setSelectedFarmerId] = useState(null);
     const [farmerData, setFarmerData] = useState(null);
-
-    const fetchInsurerFarmers = async () => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/api/insurer/farmers`);
-            setFarmers(response.data);
-        } catch (error) {
-            console.error("Error fetching insurer-relevant farmers:", error);
-        }
-    };
-
-    const fetchFarmerDetails = async (id) => {
-        try {
-            // This is the endpoint that returns the nested data structure
-            const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
-            setFarmerData(response.data);
-            setSelectedFarmerId(id);
-        } catch (error) {
-            console.error("Error fetching farmer details:", error);
-            setFarmerData(null);
-        }
-    };
-
+    const fetchInsurerFarmers = async () => { try { const response = await axios.get(`${API_BASE_URL}/api/insurer/farmers`); setFarmers(response.data); } catch (error) { console.error("Error fetching insurer-relevant farmers:", error); } };
+    const fetchFarmerDetails = async (id) => { try { const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`); setFarmerData(response.data); setSelectedFarmerId(id); } catch (error) { console.error("Error fetching farmer details:", error); setFarmerData(null); } };
     const handleReview = async (action) => {
         if (!selectedFarmerId) return;
-        try {
-            const res = await axios.post(`${API_BASE_URL}/api/insurance/${selectedFarmerId}/review`, { action });
-            alert(res.data.message);
-            await fetchFarmerDetails(selectedFarmerId);
-            await fetchInsurerFarmers();
-        } catch (err) {
-            alert(err.response?.data?.message || 'Review failed');
-        }
+        try { const res = await axios.post(`${API_BASE_URL}/api/insurance/${selectedFarmerId}/review`, { action }); alert(res.data.message); await fetchFarmerDetails(selectedFarmerId); await fetchInsurerFarmers(); }
+        catch (err) { alert(err.response?.data?.message || 'Review failed'); }
     };
-
-    useEffect(() => {
-        fetchInsurerFarmers();
-    }, []);
-
-    // --- LIST VIEW ---
+    useEffect(() => { fetchInsurerFarmers(); }, []);
     if (!selectedFarmerId || !farmerData) {
         return (
             <div className="dashboard-list-container">
@@ -922,43 +912,14 @@ const InsurerDashboard = ({ setView }) => {
                 <p>Select a farmer to view and manage their insurance policy.</p>
                 {farmers.map((farmer) => (
                     <div key={farmer.id} className="farmer-card">
-                        <div>
-                            <strong>{farmer.name} (ID: {farmer.id})</strong><br/>
-                            <span>Policy Status: {farmer.policy_status} | Score: {farmer.score}</span>
-                        </div>
+                        <div><strong>{farmer.name} (ID: {farmer.id})</strong><br /><span>Policy Status: {farmer.policy_status} | Score: {farmer.score}</span></div>
                         <button className="btn-view" onClick={() => fetchFarmerDetails(farmer.id)}>View Policy</button>
                     </div>
                 ))}
             </div>
         );
     }
-    
-    // --- DETAIL VIEW (FIXED) ---
-    
-    // 1. Defensive Coding: Safely access the nested status data
-    const currentStatus = farmerData.current_status || {};
-    
     const claimStatus = farmerData.insurance_claim_status || 'NONE';
-
-    // 2. Map Props from the state variable (farmerData)
-    const cardProps = {
-        key: farmerData.id,
-        // Pass the root object as the 'farmer' prop
-        farmer: farmerData, 
-        
-        // Safely read nested score/risk/xai 
-        score: currentStatus.score,
-        risk: currentStatus.risk_band,
-        xaiFactors: currentStatus.xai_factors || [],
-
-        // Other props are at the root
-        contractHash: farmerData.contract_hash,
-        contractState: farmerData.contract_state,
-        stages: farmerData.stages,
-        contractHistory: farmerData.contract_history || [],
-    };
-
-
     return (
         <div className="dashboard-list-container">
             <button className="btn-back" onClick={() => { setSelectedFarmerId(null); setFarmerData(null); fetchInsurerFarmers(); }}>← Back to List</button>
@@ -966,22 +927,27 @@ const InsurerDashboard = ({ setView }) => {
             <div className="policy-card">
                 <h3>Weather-Index Insurance Policy</h3>
                 <p>Policy ID: <strong>{farmerData.policy_id || 'Not Active'}</strong></p>
-                <p>Status: <strong style={{color: farmerData.has_insurance ? 'green' : 'orange'}}>{farmerData.has_insurance ? 'ACTIVE' : 'PENDING'}</strong></p>
+                <p>Status: <strong style={{ color: farmerData.has_insurance ? 'green' : 'orange' }}>{farmerData.has_insurance ? 'ACTIVE' : 'PENDING'}</strong></p>
                 <p>Claim Status: <strong>{claimStatus}</strong></p>
             </div>
-            
             {claimStatus === 'CLAIM_PENDING' && (
-              <div style={{ margin: '20px 0', padding: '10px', border: '1px solid #ffc107', borderRadius: '5px' }}>
-                  <h4>Claim Review Required</h4>
-                  <p>A drought event was triggered via IoT sensor data for this farmer.</p>
-                  <button className="btn-approve" onClick={() => handleReview('APPROVE')}>Approve Claim</button>
-                  <button className="btn-insurer" onClick={() => handleReview('REJECT')}>Reject Claim</button>
-              </div>
+                <div style={{ margin: '20px 0', padding: '10px', border: '1px solid #ffc107', borderRadius: '5px' }}>
+                    <h4>Claim Review Required</h4>
+                    <p>A drought event was triggered via IoT sensor data for this farmer.</p>
+                    <button className="btn-approve" onClick={() => handleReview('APPROVE')}>Approve Claim</button>
+                    <button className="btn-insurer" onClick={() => handleReview('REJECT')}>Reject Claim</button>
+                </div>
             )}
-            
-            {/* 3. Render the Restricted Card with Corrected Props */}
-            <InsurerDetailsCard {...cardProps} />
-
+            {/* 4. This is the final change: Call the new restricted-view card */}
+            <InsurerDetailsCard
+                farmer={farmerData}
+                score={farmerData.current_status.score}
+                risk={farmerData.current_status.risk_band}
+                xaiFactors={farmerData.current_status.xai_factors || []}
+                contractHash={farmerData.contract_hash}
+                contractState={farmerData.contract_state}
+                stages={farmerData.stages}
+            />
         </div>
     );
 };
