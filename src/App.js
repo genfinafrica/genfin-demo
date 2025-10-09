@@ -466,7 +466,7 @@ const FarmerChatbotMock = ({ setView }) => {
             return;
         }
         setShowIoTInput(true);
-        pushBotMessage("Please type simple sensor readings (e.g. `temperature:36, moisture:12, ph:6.5`) or type **CANCEL**.");
+        pushBotMessage("Please type in file name (e.g. 'IoT.csv') or simple sensor readings (e.g. `temperature:36, moisture:12, ph:6.5`) or type **CANCEL**.");
     };
     const handleIotData = async (dataInput) => {
         setShowIoTInput(false);
