@@ -629,7 +629,34 @@ const FarmerChatbotMock = ({ setView }) => {
                 pushBotMessage("To register, please enter your **Full Name**.");
                 break;
             case 'HELP':
-                pushBotMessage("Commands:\n• **STATUS**\n• **UPLOAD**\n• **IOT**\n• **REGISTER**\n• **RESET**");
+                pushBotMessage("Hello! I am your GENFIN 🌱 Africa Financing Assistant. I can help you manage your stage-based loan and insurance policy. To complete your financing journey, use the following commands:\n•
+
+📄  **Get Started (New Farmers)**
+Type **REGISTER** to create your profile and begin the loan process.\n•
+
+✅ **Check Loan Status & Next Steps**
+Type **STATUS** to see your current stage, AI score, insurance policy, and what to do next. This is your main dashboard.\n•
+
+🌱 **Unlock the Next Stage**
+The **STATUS** command tells you when a stage is 'UNLOCKED' and what proof is needed. To submit it, type **UPLOAD**.\n•
+
+📈 **View Your AI Score**
+Your AI Proficiency Score is shown at the top of the **STATUS** report. A higher score helps unlock financing.\n•
+
+🌧️ **Check Insurance Policy**
+Your weather-index insurance status is also included in the **STATUS** report. After Stage 4, type **IOT** to submit sensor data to check for drought triggers.\n•
+
+---
+***Note***: The full smart contract audit log is visible to Lenders and Admins for transparency, but not directly available in this chat.\n•
+   
+---
+**All Commands:**
+• **STATUS**: Your main dashboard.
+• **REGISTER**: Sign up as a new farmer.
+• **UPLOAD**: Submit a document for the current stage.
+• **IOT**: Submit farm sensor data.
+• **RESET**: Clear your session and start over.
+• **HELP**: Show this guide.");
                 break;
             case 'UPLOAD':
                 if (!farmerId) pushBotMessage("Use **STATUS** first.");
