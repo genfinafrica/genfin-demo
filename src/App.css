@@ -167,6 +167,12 @@ button:hover,
     height: auto;
     margin-bottom: 15px;
 }
+
+.faq-image {
+    max-width: 90%;
+    height: auto;
+    margin-bottom: 15px;
+}
 .modal {
   position: fixed;
   top: 0;
