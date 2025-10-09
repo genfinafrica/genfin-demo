@@ -952,15 +952,16 @@ const InsurerDashboard = ({ setView }) => {
             )}
             
             <InsurerDetailsCard 
-    key={farmer.id}
-    farmer={farmer.farmer}
-    score={farmer.score}
-    risk={farmer.risk}
-    xaiFactors={farmer.xai_factors}
-    contractHash={farmer.contract_hash}
-    contractState={farmer.contract_state}
-    stages={farmer.stages}
-    contractHistory={farmer.contract_history}
+    // key is not strictly necessary here, but we'll use a valid value if kept
+    key={farmerData.id} 
+    farmer={farmerData.farmer}
+    score={farmerData.score}
+    risk={farmerData.risk}
+    xaiFactors={farmerData.xai_factors}
+    contractHash={farmerData.contract_hash}
+    contractState={farmerData.contract_state}
+    stages={farmerData.stages}
+    contractHistory={farmerData.contract_history}
 />
 
         </div>
