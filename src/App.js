@@ -337,7 +337,7 @@ const FarmerChatbotMock = ({ setView }) => {
       [Simulated Map Component with Dropped Pin]
       <span style="margin-left:10px; color:#dc3545;">📍 Location Dropped: -1.286389, 36.817223</span>
   </div>
-  <p style="margin-top:10px; margin-bottom:0;">Location confirmed automatically. Proceeding to the next step.</p>
+  <p style="margin-top:10px; margin-bottom:0;">Location confirmed automatically. Type NEXT to proceed.</p>
 </div>
 `;
         // --- NEW STEP: LOCATION PIN SIMULATION (INSERT END) ---
