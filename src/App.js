@@ -329,7 +329,27 @@ const FarmerChatbotMock = ({ setView }) => {
         let currentData = { ...registrationData };
         if (chatState === 'REG_AWAITING_NAME') {
             currentData.name = inputText;
-            
+            nextState = 'REG_AWAITING_LOCATION';
+        botMessage = (
+            <div style={{ padding: '10px', backgroundColor: '#e9f7ef', borderRadius: '5px' }}>
+                ✅ **CRITICAL STEP:** We need to confirm your farm location for soil analysis and compliance.
+                <div style={{ border: '1px solid #ccc', marginTop: '10px', height: '150px', 
+                              backgroundColor: '#f8f8f8', display: 'flex', 
+                              alignItems: 'center', justifyContent: 'center', 
+                              color: '#6c757d', fontWeight: 'bold' }}>
+                    [Simulated Map Component with Dropped Pin]
+                    <span style={{ marginLeft: '10px', color: '#dc3545' }}>📍 Location Dropped: -1.286389, 36.817223</span>
+                </div>
+                <p style={{marginTop: '10px', marginBottom: '0'}}>Location confirmed automatically. Proceeding to the next step.</p>
+            </div>
+        );
+        // --- NEW STEP: LOCATION PIN SIMULATION (INSERT END) ---
+
+    } else if (chatState === 'REG_AWAITING_LOCATION') { // <-- NEW STATE HANDLER
+        // This state handles the visual message and immediately jumps to the next real input
+        currentData.location_sim = 'Simulated Pin Drop: -1.286389, 36.817223';
+        nextState = 'REG_AWAITING_PHONE';
+        botMessage = "Thank you for sharing your location. Now enter your **Phone Number** (e.g., +27 72 XXX XXXXX).";
         } else if (chatState === 'REG_AWAITING_PHONE') {
             currentData.phone = inputText;
             nextState = 'REG_AWAITING_AGE';
