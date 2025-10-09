@@ -154,8 +154,25 @@ const FaqSection = () => {
                 <summary>2. Demo Flows and Testing Instructions</summary>
                 <div className="faq-content">
                     <h4>Q4: How do I test the end-to-end financing flow?</h4>
-                    <p><strong>A:</strong> The demo is driven by user roles, simulating a full crop cycle across multiple stages: 1. <strong>Start (Farmer Chatbot Mock):</strong> Simulate initial onboarding. 2. <strong>Lender/Admin Dashboard:</strong> Monitor portfolio, disburse loan amounts and see the initial <strong>AI Score</strong>. 3. <strong>Field Officer Dashboard:</strong> This is the <em>trigger point</em>. Use this dashboard to <strong>verify a milestone</strong> (e.g., confirming <em>Soil Test Completed</em>). To unlock Stage Five you must manually trigger Pest Event from this dashboard. 4. <strong>Insurer Dashboard:</strong> Monitor policy status and view how <strong>event triggers</strong> affect the policy. Policy Claim is triggered only when moisture reads less than 20 upon IoT manual input after Stage Four.</p>
+<p>
+    <strong>A:</strong> The demo is driven by user roles, simulating a full crop cycle across multiple stages:
+</p>
 
+{/* CRITICAL FIX: Replace the old paragraph with an Ordered List (<ol>) */}
+<ol style={{ paddingLeft: '25px', marginTop: '10px' }}>
+    <li>
+        <strong>Start (Farmer Chatbot Mock):</strong> Simulate initial onboarding.
+    </li>
+    <li>
+        <strong>Lender/Admin Dashboard:</strong> Monitor portfolio, disburse loan amounts and see the initial <strong>AI Score</strong>.
+    </li>
+    <li>
+        <strong>Field Officer Dashboard:</strong> This is the *trigger point*. Use this dashboard to <strong>verify a milestone</strong> (e.g., confirming *Soil Test Completed*). To unlock Stage Five you must manually trigger Pest Event from this dashboard.
+    </li>
+    <li>
+        <strong>Insurer Dashboard:</strong> Monitor policy status and view how **event triggers** affect the policy. Policy Claim is triggered only when moisture reads less than 20 upon IoT manual input after Stage Four.
+    </li>
+</ol>
                     <h4>Q5: How is the Stage-Based Disbursement system demonstrated?</h4>
                     <p><strong>A:</strong> Stages are sequential. You will observe the <code>Contract State</code> on the dashboards change from one stage to the next <strong>only</strong> after the Field Officer confirms the preceding milestone. This demonstrates the core principle: <strong>Verification precedes Disbursement</strong>.</p>
                     
