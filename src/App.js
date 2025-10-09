@@ -74,6 +74,55 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                 </div>
             ))}
 
+                
+            {/* XAI Modal */}
+            <Modal show={showXaiModal} onClose={() => setShowXaiModal(false)} title="AI Proficiency Score (XAI)">
+                <p><strong>Score: {score}</strong> | Risk Band: {risk}</p>
+                <p>Explanation of the current score based on mocked federated learning factors:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Factor</th>
+                            <th>Contribution (Mock)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {xaiFactors.map((f, index) => (
+                            <tr key={index}>
+                                <td>{f.factor}</td>
+                                <td>+{f.weight.toFixed(1)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Modal>
+
+            {/* Contract Modal */}
+            <Modal show={showContractModal} onClose={() => setShowContractModal(false)} title="Smart Contract Audit Trail">
+                <p>This is a simulated immutable log of all contract state transitions.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>State Transition</th>
+                            <th>Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {contractHistory.map((entry, index) => (
+                            <tr key={index}>
+                                <td>{new Date(entry.timestamp).toLocaleString()}</td>
+                                <td>{entry.state}</td>
+                                <td>{entry.hash.substring(0, 10)}...</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Modal>
+        </div>
+    );
+};
+
 // --- NEW CONSTANT FOR INSURER DATA MINIMALITY ---
 const INSURER_XAI_FACTORS = [
     "Stages Completed Ratio",
@@ -122,55 +171,6 @@ const InsurerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, con
                 <XaiFactorTable xaiFactors={filteredXaiFactors} />
                 <p>The score is calculated based on a mock Federated Learning model designed for GENFIN.</p>
                 <p className="disclaimer">Note: Factors have been filtered to show only information relevant to insurance underwriting and risk mitigation, per data governance policy.</p>
-            </Modal>
-        </div>
-    );
-};
-                     
-
-            {/* XAI Modal */}
-            <Modal show={showXaiModal} onClose={() => setShowXaiModal(false)} title="AI Proficiency Score (XAI)">
-                <p><strong>Score: {score}</strong> | Risk Band: {risk}</p>
-                <p>Explanation of the current score based on mocked federated learning factors:</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Factor</th>
-                            <th>Contribution (Mock)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {xaiFactors.map((f, index) => (
-                            <tr key={index}>
-                                <td>{f.factor}</td>
-                                <td>+{f.weight.toFixed(1)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </Modal>
-
-            {/* Contract Modal */}
-            <Modal show={showContractModal} onClose={() => setShowContractModal(false)} title="Smart Contract Audit Trail">
-                <p>This is a simulated immutable log of all contract state transitions.</p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>State Transition</th>
-                            <th>Hash</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {contractHistory.map((entry, index) => (
-                            <tr key={index}>
-                                <td>{new Date(entry.timestamp).toLocaleString()}</td>
-                                <td>{entry.state}</td>
-                                <td>{entry.hash.substring(0, 10)}...</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
             </Modal>
         </div>
     );
