@@ -330,19 +330,17 @@ const FarmerChatbotMock = ({ setView }) => {
         if (chatState === 'REG_AWAITING_NAME') {
             currentData.name = inputText;
             nextState = 'REG_AWAITING_LOCATION';
-        botMessage = (
-            <div style={{ padding: '10px', backgroundColor: '#e9f7ef', borderRadius: '5px' }}>
-                ✅ **CRITICAL STEP:** We need to confirm your farm location for soil analysis and compliance.
-                <div style={{ border: '1px solid #ccc', marginTop: '10px', height: '150px', 
-                              backgroundColor: '#f8f8f8', display: 'flex', 
-                              alignItems: 'center', justifyContent: 'center', 
-                              color: '#6c757d', fontWeight: 'bold' }}>
-                    [Simulated Map Component with Dropped Pin]
-                    <span style={{ marginLeft: '10px', color: '#dc3545' }}>📍 Location Dropped: -1.286389, 36.817223</span>
-                </div>
-                <p style={{marginTop: '10px', marginBottom: '0'}}>Location confirmed automatically. Proceeding to the next step.</p>
-            </div>
-        );
+        botMessage = botMessage = `
+<div style="padding:10px; background-color:#e9f7ef; border-radius:5px;">
+  <strong>✅ CRITICAL STEP:</strong> We need to confirm your farm location for soil analysis and compliance.
+  <div style="border:1px solid #ccc; margin-top:10px; height:150px; background-color:#f8f8f8;
+              display:flex; align-items:center; justify-content:center; color:#6c757d; font-weight:bold;">
+      [Simulated Map Component with Dropped Pin]
+      <span style="margin-left:10px; color:#dc3545;">📍 Location Dropped: -1.286389, 36.817223</span>
+  </div>
+  <p style="margin-top:10px; margin-bottom:0;">Location confirmed automatically. Proceeding to the next step.</p>
+</div>
+`;
         // --- NEW STEP: LOCATION PIN SIMULATION (INSERT END) ---
 
     } else if (chatState === 'REG_AWAITING_LOCATION') { // <-- NEW STATE HANDLER
