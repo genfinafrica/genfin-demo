@@ -170,7 +170,7 @@ const FaqSection = () => {
         <strong>Field Officer Dashboard:</strong> This is the *trigger point*. Use this dashboard to <strong>verify a milestone</strong> (e.g., confirming *Soil Test Completed*). To unlock Stage Five you must manually trigger Pest Event from this dashboard.
     </li>
     <li>
-        <strong>Insurer Dashboard:</strong> Monitor policy status and view how **event triggers** affect the policy. Policy Claim is triggered only when moisture reads below 25 or temperature is above 35 upon IoT manual input after Stage Four.
+        <strong>Insurer Dashboard:</strong> Monitor policy status and view how **event triggers** affect the policy. Policy Claim is triggered only when moisture reads below 25 upon IoT manual input after Stage Four.
     </li>
 </ol>
                     <h4>Q5: How is the Stage-Based Disbursement system demonstrated?</h4>
