@@ -637,14 +637,14 @@ const LenderDashboard = ({ setView }) => {
         }
     };
 
-    useEffect(() =>button {
+    useEffect(() => {
         fetchFarmers();
     }, []);
 
     if (!selectedFarmerId || !farmerData) {
         return (
             <div className="dashboard-list-container">
-                < className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
+                <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Lender/Admin Dashboard</h2>
                 <p>Select a farmer to view progress and disburse funds.</p>
                 {farmers.map((farmer) => (
