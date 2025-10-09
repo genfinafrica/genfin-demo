@@ -320,7 +320,7 @@ const FarmerChatbotMock = ({ setView }) => {
             statusMessage += `📋 Stages (${stages.length}):\n`;
             stages.forEach(s => {
                 const marker = s.stage_number === (currentStage?.stage_number) ? '→ ' : '   ';
-                statusMessage += `${marker}Stage ${s.stage_number}: ${s.stage_name} — ${s.status}\n`;
+                statusMessage += `${marker}${s.stage_name} — ${s.status}\n`;            
             });
             statusMessage += `\n📂 Uploaded files: ${uploadedFiles.length ? uploadedFiles.join(', ') : 'None'}\n`;
             statusMessage += `\n➡️ ${nextHint}\n\nType **UPLOAD**, **IOT** for sensor data, or **HELP**.`;
