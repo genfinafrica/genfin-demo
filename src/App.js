@@ -9,7 +9,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
 // This is a placeholder for your logo source
 const LOGO_SRC = "https://lh3.googleusercontent.com/d/1JWvtX4b24wt5vRGmhYsUW029NS0grXOq";
 
-const FAQ_IMG = "https://lh3.googleusercontent.com/d/1CA3_rgBfriiqvWZu8Ts_H-rZJcGBM77D";
+const FAQ_IMG_SRC = "https://lh3.googleusercontent.com/d/1CA3_rgBfriiqvWZu8Ts_H-rZJcGBM77D";
 
 // --- UTILITY COMPONENTS ---
 
@@ -130,7 +130,7 @@ const FaqSection = () => {
             
             {/* Introductory Text Section */}
             <div className="faq-intro">
-                <img src={FAQ_IMG} alt="eSusFarm Stage-Based Financing Workflow" className="faq-image" />
+                <img src={FAQ_IMG_SRC} alt="eSusFarm Stage-Based Financing Workflow" className="faq-image" />
                 <p>
                     <strong>eSusFarm introduces a new model of climate-smart financing by linking farm productivity, data, and financial access through AI and blockchain.</strong> Unlike traditional microfinance or insurance models that require collateral or credit history, our platform uses farmer proficiency scores—derived from soil health, weather, and farming behaviour—to unlock stage-based financing. Each disbursement is automated through smart contracts, triggered only when verified milestones (e.g., soil testing, planting) are met. This ensures funds are used productively while reducing default risk without needing collateral. The innovation lies in merging decentralized trust, real-time data, and inclusive design to de-risk agricultural lending. Farmers don’t just receive aid—they build digital credit identities that enable long-term financial inclusion and resilience across Africa’s most vulnerable communities.
                 </p>
