@@ -29,12 +29,7 @@ const Modal = ({ show, onClose, title, children }) => {
     );
 };
 
-// --- NEW CONSTANT FOR INSURER DATA MINIMALITY ---
-const INSURER_XAI_FACTORS = [
-    "Stages Completed Ratio",
-    "Land Size (Acres)",
-    "Soil Quality Score (Mock)",
-];
+
 
 
 // --- DASHBOARD COMPONENTS ---
@@ -79,6 +74,12 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                 </div>
             ))}
 
+// --- NEW CONSTANT FOR INSURER DATA MINIMALITY ---
+const INSURER_XAI_FACTORS = [
+    "Stages Completed Ratio",
+    "Land Size (Acres)",
+    "Soil Quality Score (Mock)",
+];
 
 // --- InsurerDetailsCard: Restricted View for POPIA Compliance ---
 const InsurerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, contractState, stages, contractHistory }) => {
