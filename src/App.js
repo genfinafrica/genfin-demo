@@ -29,6 +29,13 @@ const Modal = ({ show, onClose, title, children }) => {
     );
 };
 
+// --- NEW CONSTANT FOR INSURER DATA MINIMALITY ---
+const INSURER_XAI_FACTORS = [
+    "Stages Completed Ratio",
+    "Land Size (Acres)",
+    "Soil Quality Score (Mock)",
+];
+
 
 // --- DASHBOARD COMPONENTS ---
 
@@ -71,6 +78,54 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                     <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
                 </div>
             ))}
+
+
+// --- InsurerDetailsCard: Restricted View for POPIA Compliance ---
+const InsurerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, contractState, stages, contractHistory }) => {
+    const [showXaiModal, setShowXaiModal] = useState(false);
+    
+    // 1. FILTER XAI FACTORS: Filter factors to only show minimal, insurance-relevant data
+    const filteredXaiFactors = xaiFactors.filter(factor => 
+        INSURER_XAI_FACTORS.includes(factor.factor) || factor.factor === "Base Score"
+    );
+
+    // Reverse stage order for display (latest first)
+    const reversedStages = [...stages].reverse();
+
+    return (
+        <div className="farmer-card">
+            <div>
+                <h3>Farmer: {farmer.name} ({farmer.phone})</h3>
+                <p>Contract Hash: {contractHash || 'N/A'}</p>
+                <p>Current Stage: <b>{contractState}</b></p>
+                <p>Latest Policy: <span className={contractState === 'INSURANCE_PREMIUM_PAID' || contractState === 'IOT_INGESTION_STARTED' ? 'policy-status-active' : 'policy-status-pending'}>
+                    {contractState === 'INSURANCE_PREMIUM_PAID' || contractState === 'IOT_INGESTION_STARTED' ? 'Active' : 'Not Activated'}
+                </span></p>
+            </div>
+
+            <div style={{ textAlign: 'right' }}>
+                <p>AI Score: <b>{score}</b></p>
+                <p>Risk: <b style={{ color: risk === 'LOW' ? 'green' : risk === 'MEDIUM' ? 'orange' : 'red' }}>{risk}</b></p>
+                <button className="btn-view" onClick={() => setShowXaiModal(true)}>View XAI</button>
+                {/* 2. CONTRACT LOG REMOVED: The View Contract Log button is removed here 
+                    to comply with data minimality and restrict access to private loan details. */}
+            </div>
+
+            <Modal
+                show={showXaiModal}
+                onClose={() => setShowXaiModal(false)}
+                title={`XAI Score Details: ${score} (${risk})`}
+            >
+                <h4>Score Factors (Filtered)</h4>
+                {/* 3. FILTERED FACTORS PASSED: Pass the restricted list to the table */}
+                <XaiFactorTable xaiFactors={filteredXaiFactors} />
+                <p>The score is calculated based on a mock Federated Learning model designed for GENFIN.</p>
+                <p className="disclaimer">Note: Factors have been filtered to show only information relevant to insurance underwriting and risk mitigation, per data governance policy.</p>
+            </Modal>
+        </div>
+    );
+};
+                     
 
             {/* XAI Modal */}
             <Modal show={showXaiModal} onClose={() => setShowXaiModal(false)} title="AI Proficiency Score (XAI)">
@@ -895,16 +950,18 @@ const InsurerDashboard = ({ setView }) => {
               </div>
             )}
             
-            <FarmerDetailsCard 
-                farmer={farmerData}
-                score={farmerData.current_status.score}
-                risk={farmerData.current_status.risk_band}
-                xaiFactors={farmerData.current_status.xai_factors || []}
-                contractHash={farmerData.contract_hash}
-                contractState={farmerData.contract_state}
-                stages={farmerData.stages}
-                contractHistory={farmerData.contract_history || []}
-            />
+            <InsurerDetailsCard 
+    key={farmer.id}
+    farmer={farmer.farmer}
+    score={farmer.score}
+    risk={farmer.risk}
+    xaiFactors={farmer.xai_factors}
+    contractHash={farmer.contract_hash}
+    contractState={farmer.contract_state}
+    stages={farmer.stages}
+    contractHistory={farmer.contract_history}
+/>
+
         </div>
     );
 };
