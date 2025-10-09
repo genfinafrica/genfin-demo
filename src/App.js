@@ -580,14 +580,22 @@ const FarmerChatbotMock = ({ setView }) => {
             <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
             <p><b>Whatsapp Farmer Chatbot Mock-up</b></p>
             <div className="chat-window" style={{ minHeight: 300, maxHeight: 420, overflowY: 'auto' }}>
-                {messages.map((msg, index) => (
-                    <div key={index} className={`message-row ${msg.sender}`} style={{ marginBottom: 8 }}>
-                        <div className="message-bubble" dangerouslySetInnerHTML={{ __html: formatBotMessage(msg.text) }} />
-                        <span className="timestamp" style={{ fontSize: 10 }}>{msg.timestamp}</span>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </div>
+  {messages.map((msg, index) => (
+    <div key={index} className={`message-row ${msg.sender}`} style={{ marginBottom: 8 }}>
+      <div
+        className="message-bubble"
+        dangerouslySetInnerHTML={{
+          __html: String(msg.text)
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>')
+        }}
+      />
+      <span className="timestamp" style={{ fontSize: 10 }}>{msg.timestamp}</span>
+    </div>
+  ))}
+  <div ref={messagesEndRef} />
+</div>
             {showUploadInput && <div className="mock-file-input" style={{ marginTop: 8 }}><label>Mock Upload — Enter filename in chat or type CANCEL</label></div>}
             {showIoTInput && <div style={{ marginTop: 8 }}><small>IoT input open — type `temperature:36, moisture:12, ph:6.5`</small></div>}
             <form className="chat-input-form" onSubmit={handleInput} style={{ marginTop: 8 }}>
