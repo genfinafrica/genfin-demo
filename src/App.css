@@ -401,13 +401,18 @@ button:hover,
 /* --- FAQ CONTENT STYLES --- */
 
 /* Clean up the main container now that it's inside a dashboard card */
+/* Find and REPLACE this style block */
 .faq-container {
+    width: 100%; /* Ensures it fills the space given by the dashboard */
+    box-sizing: border-box; /* CRITICAL: Ensures padding/border is calculated INWARD */
     margin-top: 10px; 
-    padding-top: 0;
+    padding: 0;
     border-top: none; 
     text-align: left;
 }
 
+
+/* Find and REPLACE this style block */
 .faq-intro {
     display: flex;
     gap: 20px;
@@ -415,8 +420,12 @@ button:hover,
     padding: 15px;
     background-color: #f7f9fc;
     border-radius: 8px;
+    
+    /* FIX: ALLOWS CONTENT TO WRAP ON SMALLER SCREENS */
+    flex-wrap: wrap; 
 }
 
+/* FIX: Ensures the image and text block respect the flex container limits */
 .faq-image {
     max-width: 300px;
     height: auto;
@@ -425,10 +434,13 @@ button:hover,
 }
 
 .faq-intro p {
+    flex-grow: 1;
+    /* Ensures the text block has a minimum width before it forces the flex row to overflow */
+    min-width: 250px; 
     font-size: 0.95em;
     line-height: 1.5;
-    flex-grow: 1;
 }
+
 
 .faq-details {
     margin-bottom: 15px;
