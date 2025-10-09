@@ -875,6 +875,7 @@ const InsurerDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmerId, setSelectedFarmerId] = useState(null);
     const [farmerData, setFarmerData] = useState(null);
+
     const fetchInsurerFarmers = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/insurer/farmers`);
@@ -883,8 +884,10 @@ const InsurerDashboard = ({ setView }) => {
             console.error("Error fetching insurer-relevant farmers:", error);
         }
     };
+
     const fetchFarmerDetails = async (id) => {
         try {
+            // This is the endpoint that returns the nested data structure
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
             setFarmerData(response.data);
             setSelectedFarmerId(id);
@@ -910,6 +913,7 @@ const InsurerDashboard = ({ setView }) => {
         fetchInsurerFarmers();
     }, []);
 
+    // --- LIST VIEW ---
     if (!selectedFarmerId || !farmerData) {
         return (
             <div className="dashboard-list-container">
@@ -929,7 +933,31 @@ const InsurerDashboard = ({ setView }) => {
         );
     }
     
+    // --- DETAIL VIEW (FIXED) ---
+    
+    // 1. Defensive Coding: Safely access the nested status data
+    const currentStatus = farmerData.current_status || {};
+    
     const claimStatus = farmerData.insurance_claim_status || 'NONE';
+
+    // 2. Map Props from the state variable (farmerData)
+    const cardProps = {
+        key: farmerData.id,
+        // Pass the root object as the 'farmer' prop
+        farmer: farmerData, 
+        
+        // Safely read nested score/risk/xai 
+        score: currentStatus.score,
+        risk: currentStatus.risk_band,
+        xaiFactors: currentStatus.xai_factors || [],
+
+        // Other props are at the root
+        contractHash: farmerData.contract_hash,
+        contractState: farmerData.contract_state,
+        stages: farmerData.stages,
+        contractHistory: farmerData.contract_history || [],
+    };
+
 
     return (
         <div className="dashboard-list-container">
@@ -951,19 +979,13 @@ const InsurerDashboard = ({ setView }) => {
               </div>
             )}
             
-            <InsurerDetailsCard 
-                farmer={farmerData}
-                score={farmerData.current_status.score}
-                risk={farmerData.current_status.risk_band}
-                xaiFactors={farmerData.current_status.xai_factors || []}
-                contractHash={farmerData.contract_hash}
-                contractState={farmerData.contract_state}
-                stages={farmerData.stages}
-                contractHistory={farmerData.contract_history || []}
-            />
+            {/* 3. Render the Restricted Card with Corrected Props */}
+            <InsurerDetailsCard {...cardProps} />
+
         </div>
     );
 };
+      
 
 // --- WELCOME SCREEN ---
 const WelcomeScreen = ({ setView }) => (
