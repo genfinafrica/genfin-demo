@@ -593,7 +593,7 @@ const FaqDashboard = ({ setView }) => (
     // Uses the same outer container as the other dashboards
     <div className="dashboard-list-container">
         <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
-            <h2>Evaluator FAQ & System Context</h2>            
+            <h2>Tester FAQ & System Context</h2>            
         <FaqSection /> 
     </div>
 );
