@@ -329,8 +329,7 @@ const FarmerChatbotMock = ({ setView }) => {
         let currentData = { ...registrationData };
         if (chatState === 'REG_AWAITING_NAME') {
             currentData.name = inputText;
-            nextState = 'REG_AWAITING_PHONE';
-            botMessage = "Thanks! Now enter your **Phone Number** (e.g., +27 72 XXX XXXXX).";
+            
         } else if (chatState === 'REG_AWAITING_PHONE') {
             currentData.phone = inputText;
             nextState = 'REG_AWAITING_AGE';
