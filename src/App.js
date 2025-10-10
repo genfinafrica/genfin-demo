@@ -1,15 +1,15 @@
-// src/App.js (Correctly Formatted)
+
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// Ensure this matches the URL where your Flask backend is running
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
-
-// This is a placeholder for your logo source
 const LOGO_SRC = "https://lh3.googleusercontent.com/d/1JWvtX4b24wt5vRGmhYsUW029NS0grXOq";
-
 const FAQ_IMG_SRC = "https://lh3.googleusercontent.com/d/1CA3_rgBfriiqvWZu8Ts_H-rZJcGBM77D";
+const GITHUB_LOGO_SRC = "https://lh3.googleusercontent.com/d/1LWLoq3-G8Sk-B9B5oB7CyWZnnrf2WxVN";  
+const REPO_URL = "https://github.com/genfinafrica/genfin-demo"; 
+const README_URL = "https://youtu.be/VqKsmmyPJWQ?si=2pxeW2CpCQrs7ks1";
 
 // --- UTILITY COMPONENTS ---
 
@@ -712,17 +712,64 @@ const FarmerChatbotMock = ({ setView }) => {
     );
 };
 
-// --- NEW FAQ DASHBOARD COMPONENT (The Dedicated Page Structure) ---
 const FaqDashboard = ({ setView }) => (
     // Uses the same outer container as the other dashboards
     <div className="dashboard-list-container">
         <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
-            <h2>Tester FAQ & System Context</h2>            
+        <h2>Tester FAQ & System Context</h2>
         <FaqSection /> 
+
+        {/* --- NEW SECTION FOR LINKS AND EMBEDDED VIDEO --- */}
+        <div style={{ marginTop: '40px', padding: '20px', borderTop: '1px solid #ccc' }}>
+            
+            {/* 1. Repository and README Links */}
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                <strong style={{ marginRight: '10px' }}>Project Links:</strong>
+
+                {/* GitHub Logo Link */}
+                <a 
+                    href={REPO_URL} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', marginRight: '20px' }}
+                >
+                    <img 
+                        src={GITHUB_LOGO_SRC} // Use your defined logo source
+                        alt="GitHub Repo" 
+                        style={{ height: '24px', width: '24px', marginRight: '5px' }} 
+                    />
+                    <span>GitHub Repository</span>
+                </a>
+                
+                {/* README Link */}
+                <a 
+                    href={README_URL} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: 'none', color: '#007bff', fontWeight: 'bold' }}
+                >
+                    View README.md
+                </a>
+            </div>
+
+            {/* 2. Embedded YouTube Video (Replaced with placeholder) */}
+            <h3 style={{ marginBottom: '10px' }}>Demo Presentation</h3>
+            <div className="video-container" style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', height: 0, overflow: 'hidden', maxWidth: '800px' }}>                
+                <iframe
+                    src="https://www.youtube.com/embed/VqKsmmyPJWQ?si=2pxeW2CpCQrs7ks1"
+                    title="Demo Presentation Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                ></iframe>
+            </div>
+            
+        </div>
+        {/* --- END NEW SECTION --- */}
     </div>
 );
-// --- END NEW FAQ DASHBOARD COMPONENT ---
-
+                
 
 // --- ADMIN/LENDER DASHBOARD ---
 const LenderDashboard = ({ setView }) => {
