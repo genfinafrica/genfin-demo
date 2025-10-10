@@ -724,7 +724,7 @@ const FaqDashboard = ({ setView }) => (
             
             {/* 1. Repository and README Links */}
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-                <strong style={{ marginRight: '10px' }}>Project Links:</strong>
+                <strong style={{ marginRight: '10px' }}>Project Links:</strong>\n
 
                 {/* GitHub Logo Link */}
                 <a 
