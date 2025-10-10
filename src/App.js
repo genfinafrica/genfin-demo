@@ -382,8 +382,10 @@ const FarmerChatbotMock = ({ setView }) => {
                 }
             }
 
+            const totalDisbursed = data.current_status?.total_disbursed;
             let statusMessage = `✅ **Status for ${data.name} (ID: ${id})**\n\n`;
-            statusMessage += `🌱 AI Score: ${data.current_status?.score ?? 'N/A'} (Risk: ${data.current_status?.risk_band ?? 'N/A'})\n`;
+            // --- NEW LINE ADDED ---
+            statusMessage += `💰 **Total Disbursed:** $${totalDisbursed ? totalDisbursed.toFixed(2) : '0.00'}\n`;
             
             if (data.has_insurance) {
                 const claimStatus = data.insurance_claim_status || 'UNKNOWN';
