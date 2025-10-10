@@ -35,9 +35,15 @@ const Modal = ({ show, onClose, title, children }) => {
 // --- DASHBOARD COMPONENTS ---
 
 // FarmerDetailsCard restored to its well-formatted version
+
+
 const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, contractState, stages, contractHistory }) => {
     const [showXaiModal, setShowXaiModal] = useState(false);
     const [showContractModal, setShowContractModal] = useState(false);
+
+    // Calculate Total Disbursed amount based on COMPLETED stages
+    const totalDisbursed = stages.filter(s => s.status === 'COMPLETED')
+                                 .reduce((sum, s) => sum + s.disbursement_amount, 0);
 
     // Reverse stage order for display (latest first)
     const reversedStages = [...stages].reverse();
@@ -46,18 +52,23 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
         <div className="tracker-box">
             <h4>Farmer Tracker: {farmer.name} (ID: {farmer.farmer_id})</h4>
             <div className="farmer-status-summary" style={{ display: 'flex', justifyContent: 'space-around', margin: '20px 0' }}>
+                
+                {/* --- VALID FIX: INSERT TOTAL DISBURSED HERE --- */}
                 <div style={{ padding: '10px', borderRight: '1px solid #ddd' }}>
+                    <strong>Total Disbursed Amount: ${totalDisbursed.toFixed(2)}</strong>
+                    <br />
+                    Contract: {contractState}
+                    <button className="btn-view" onClick={() => setShowContractModal(true)} style={{ marginLeft: '10px' }}>
+                        View Contract
+                    </button>
+                </div>
+                {/* ------------------------------------------- */}
+                
+                <div style={{ padding: '10px' }}>
                     <strong>Score: {score}</strong> <br />
                     Risk: <span style={{ color: risk === 'LOW' ? 'green' : risk === 'HIGH' ? 'red' : 'orange' }}>{risk}</span>
                     <button className="btn-view" onClick={() => setShowXaiModal(true)} style={{ marginLeft: '10px' }}>
                         View XAI
-                    </button>
-                </div>
-                <div style={{ padding: '10px' }}>
-                    <strong>Contract: {contractState}</strong> <br />
-                    Hash: {contractHash.substring(0, 10)}...
-                    <button className="btn-view" onClick={() => setShowContractModal(true)} style={{ marginLeft: '10px' }}>
-                        View Contract
                     </button>
                 </div>
             </div>
@@ -73,6 +84,9 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                     <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
                 </div>
             ))}
+        
+    
+
 
                 
             {/* XAI Modal */}
@@ -390,15 +404,22 @@ const FarmerChatbotMock = ({ setView }) => {
             if (data.has_insurance) {
                 const claimStatus = data.insurance_claim_status || 'UNKNOWN';
                 const triggerText = data.insurance_triggered ? '⚠️ Triggered' : 'No trigger';
-                statusMessage += `🌤️ Insurance Policy: Active | Claim status: ${claimStatus} | ${triggerText}\n\n`;
+                statusMessage += `🌤️ **Insurance Policy:** Active | Claim status: ${claimStatus} | ${triggerText}\n\n`;
             } else {
-                statusMessage += `🌤️ Insurance Policy: Not yet activated — complete Stage 3 to enable drought cover.\n\n`;
+                statusMessage += `🌤️ **Insurance Policy:** Not yet activated — complete Stage 3 to enable drought cover.\n\n`;
             }
             
             statusMessage += `📋 Stages (${stages.length}):\n`;
             stages.forEach(s => {
                 const marker = s.stage_number === (currentStage?.stage_number) ? '→ ' : '   ';
-                statusMessage += `${marker}${s.stage_name} — ${s.status}\n`;            
+                let amountText = '';
+
+                if (s.status === 'COMPLETED' && s.disbursement_amount) {
+                    // --- Display individual disbursement amount for COMPLETED stages ---
+                    amountText = ` | Disbursed: $${s.disbursement_amount.toFixed(2)}`;
+                }
+                
+                statusMessage += `${marker}${s.stage_name} — ${s.status}${amountText}\n`;            
             });
             statusMessage += `\n📂 Uploaded files: ${uploadedFiles.length ? uploadedFiles.join(', ') : 'None'}\n`;
             statusMessage += `\n➡️ ${nextHint}\n\nType **UPLOAD**, **IOT** for sensor data, or **HELP**.`;
