@@ -9,7 +9,7 @@ const LOGO_SRC = "https://lh3.googleusercontent.com/d/1JWvtX4b24wt5vRGmhYsUW029N
 const FAQ_IMG_SRC = "https://lh3.googleusercontent.com/d/1CA3_rgBfriiqvWZu8Ts_H-rZJcGBM77D";
 const GITHUB_LOGO_SRC = "https://lh3.googleusercontent.com/d/1LWLoq3-G8Sk-B9B5oB7CyWZnnrf2WxVN";  
 const REPO_URL = "https://github.com/genfinafrica/genfin-demo"; 
-const README_URL = "https://youtu.be/VqKsmmyPJWQ?si=2pxeW2CpCQrs7ks1";
+const README_URL = "https://github.com/genfinafrica/genfin-demo/blob/main/README.md#genfin-demo";
 
 // --- UTILITY COMPONENTS ---
 
@@ -724,7 +724,7 @@ const FaqDashboard = ({ setView }) => (
             
             {/* 1. Repository and README Links */}
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-                <strong style={{ marginRight: '10px' }}>Project Links:</strong>\n
+                <strong style={{ marginRight: '10px' }}>Project Links:</strong>
 
                 {/* GitHub Logo Link */}
                 <a 
