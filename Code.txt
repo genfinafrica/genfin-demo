@@ -1,0 +1,57 @@
+// App.js: inside fetchStatus function
+
+            const totalDisbursed = data.current_status?.total_disbursed;
+            // Get the new breakdown list
+            const completedStages = data.current_status?.stages_completed_list || [];
+            
+            let statusMessage = `✅ **Status for ${data.name} (ID: ${id})**\n\n`;
+            statusMessage += `💰 **Total Disbursed:** $${totalDisbursed ? totalDisbursed.toFixed(2) : '0.00'}\n\n`;
+            
+            // --- LOOP TO DISPLAY BREAKDOWN IN CHATBOT ---
+            if (completedStages.length > 0) {
+                statusMessage += `--- Disbursement Breakdown ---\n`;
+                completedStages.forEach(stage => {
+                    statusMessage += `* ${stage.stage_name}: $${stage.disbursed_amount.toFixed(2)}\n`;
+                });
+                statusMessage += `\n`;
+            }
+            // ------------------------------------
+            
+            statusMessage += `🌱 AI Score: ${data.current_status?.score ?? 'N/A'} (Risk: ${data.current_status?.risk_band ?? 'N/A'})\n`;
+            statusMessage += `📈 Next Stage to Unlock: ${data.current_status?.next_stage_name ?? 'N/A'}\n`;
+            // ... rest of the status message logic
+
+// App.js: FarmerDetailsCard component (around line 180)
+
+const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, contractState, stages, contractHistory }) => {
+    // ... existing code
+
+    // --- NEW LOGIC: Calculate Total Disbursed from stages ---
+    const totalDisbursed = stages.filter(s => s.status === 'COMPLETED')
+                                 .reduce((sum, s) => sum + s.disbursement_amount, 0);
+    // --------------------------------------------------------
+
+    return (
+        <div className="farmer-details-card">
+            {/* ... existing header content */}
+            
+            <div className="card-kpis">
+                {/* --- INSERT NEW DISPLAY HERE --- */}
+                <div className="kpi-item kpi-disbursed">
+                    <h4>Total Disbursed</h4>
+                    {/* Display the calculated total */}
+                    <p className="kpi-value">${totalDisbursed.toFixed(2)}</p> 
+                </div>
+                {/* ------------------------------- */}
+                
+                <div className="kpi-item kpi-score">
+                    <h4>AI Score</h4>
+                    <p className="kpi-value">{score}</p>
+                </div>
+                {/* ... rest of the KPIs */}
+            </div>
+            
+            {/* ... rest of the component */}
+        </div>
+    );
+};
