@@ -52,24 +52,49 @@ class Farmer(db.Model):
     def current_status(self):
         season = self.current_season
         if not season:
-            return {'total_disbursed': 0.0, 'score': 50, 'risk_band': 'MEDIUM', 'xai_factors': [], 'pest_flag': False}
+            # Added 'stages_completed_list' to the default return
+            return {'total_disbursed': 0.0, 'score': 50, 'risk_band': 'MEDIUM', 'xai_factors': [], 'pest_flag': False, 'stages_completed_list': []}
+            
         # Get latest scorecard
         scorecard = season.scorecards[-1] if season.scorecards else None
-        # Calculate total disbursed
-        total_disbursed = sum(stage.disbursement_amount for stage in season.stages if stage.status == 'COMPLETED')
+        
+        # --- NEW LOGIC TO GET STAGE BREAKDOWN ---
+        stages_completed_list = []
+        
+        # 1. Get the list of completed stages
+        completed_stages_data = [
+            stage for stage in season.stages if stage.status == 'COMPLETED'
+        ]
+        
+        # 2. Calculate total disbursed and build the detailed list
+        total_disbursed = sum(stage.disbursement_amount for stage in completed_stages_data)
+        
+        for stage in completed_stages_data:
+            # We use attributes 'name' and 'disbursement_amount' from the stage object
+            stages_completed_list.append({
+                'stage_name': stage.name, 
+                'disbursed_amount': round(stage.disbursement_amount, 2)
+            })
+        # --- END NEW LOGIC ---
+
         # Check for Pest Flag (Mock IoT Trigger) - kept for backward compatibility
         pest_flag = any(log.data and log.data.get('pest_detected') for log in season.iot_logs)
+        
+        # Find the next stage for the frontend status message
+        next_stage_obj = next((stage for stage in season.stages if stage.status == 'ACTIVE'), None)
+        
         return {
-            'total_disbursed': total_disbursed,
+            'total_disbursed': round(total_disbursed, 2), 
             'score': scorecard.score if scorecard else 50,
             'risk_band': scorecard.risk_band if scorecard else 'MEDIUM',
             'xai_factors': scorecard.xai_factors if scorecard else [],
-            'pest_flag': pest_flag
+            'pest_flag': pest_flag,
+            
+            # --- NEW DATA FOR FRONTEND BREAKDOWN ---
+            'stages_completed_list': stages_completed_list, 
+            'next_stage_name': next_stage_obj.name if next_stage_obj else "Completed"
         }
-
-    def __repr__(self):
-        return f"Farmer('{self.name}', '{self.phone}')"
-
+        
 
 class Season(db.Model):
     id = db.Column(db.Integer, primary_key=True)
