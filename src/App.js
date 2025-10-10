@@ -390,9 +390,9 @@ const FarmerChatbotMock = ({ setView }) => {
             if (data.has_insurance) {
                 const claimStatus = data.insurance_claim_status || 'UNKNOWN';
                 const triggerText = data.insurance_triggered ? '⚠️ Triggered' : 'No trigger';
-                statusMessage += `🌤️ Insurance Policy: Active | Claim status: ${claimStatus} | ${triggerText}\n\n`;
+                statusMessage += `🌤️ **Insurance Policy:** Active | Claim status: ${claimStatus} | ${triggerText}\n\n`;
             } else {
-                statusMessage += `🌤️ Insurance Policy: Not yet activated — complete Stage 3 to enable drought cover.\n\n`;
+                statusMessage += `🌤️ **Insurance Policy:** Not yet activated — complete Stage 3 to enable drought cover.\n\n`;
             }
             
             statusMessage += `📋 Stages (${stages.length}):\n`;
