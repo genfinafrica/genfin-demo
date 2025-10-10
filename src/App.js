@@ -648,7 +648,7 @@ const FarmerChatbotMock = ({ setView }) => {
     };
 
     useEffect(() => {
-        pushBotMessage("Welcome to the GENFIN 🌱 demo. I am your financing assistant. Type **REGISTER** to sign up or **STATUS** if you have a Farmer ID.");
+        pushBotMessage("Welcome to the GENFIN 🌱 demo. I am your financing assistant. Type **REGISTER** to sign up or **STATUS** if you have a Farmer ID. Type **HELP** if you need more information.");
     }, []);
 
     return (
