@@ -738,7 +738,7 @@ const FaqDashboard = ({ setView }) => (
                         alt="GitHub Repo" 
                         style={{ height: '24px', width: '24px', marginRight: '5px' }} 
                     />
-                   // <span>GitHub Repository</span>
+                   
                 </a>
                 
                 {/* README Link */}
