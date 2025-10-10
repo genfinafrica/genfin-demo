@@ -84,9 +84,9 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                     <span style={{ fontWeight: 'bold' }}>{stage.status}</span>
                 </div>
             ))}
-        </div>
-    );
-};
+        
+    
+
 
                 
             {/* XAI Modal */}
