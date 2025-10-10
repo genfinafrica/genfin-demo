@@ -1,6 +1,6 @@
 # genfin-demo
 
-This is a generated README.md file for the GENFIN-AFRICA Demo System, combining the business requirements specification (BRS) with the technical details from the App.js (React) and app.py (Flask) files.
+
 GENFIN-AFRICA: Stage-Based Financing Demo System
 This application demonstrates a cutting-edge model for climate-smart financing, linking smallholder farmer productivity, data-driven scoring, and financial access through the simulation of AI and decentralized ledger technology (blockchain).
 The core concept is to provide stage-based financing unlocked only when verified farming milestones are met, moving away from traditional collateral-based lending.
