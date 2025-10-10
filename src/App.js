@@ -398,7 +398,14 @@ const FarmerChatbotMock = ({ setView }) => {
             statusMessage += `📋 Stages (${stages.length}):\n`;
             stages.forEach(s => {
                 const marker = s.stage_number === (currentStage?.stage_number) ? '→ ' : '   ';
-                statusMessage += `${marker}${s.stage_name} — ${s.status}\n`;            
+                let amountText = '';
+
+                if (s.status === 'COMPLETED' && s.disbursement_amount) {
+                    // --- Display individual disbursement amount for COMPLETED stages ---
+                    amountText = ` | Disbursed: $${s.disbursement_amount.toFixed(2)}`;
+                }
+                
+                statusMessage += `${marker}${s.stage_name} — ${s.status}${amountText}\n`;            
             });
             statusMessage += `\n📂 Uploaded files: ${uploadedFiles.length ? uploadedFiles.join(', ') : 'None'}\n`;
             statusMessage += `\n➡️ ${nextHint}\n\nType **UPLOAD**, **IOT** for sensor data, or **HELP**.`;
