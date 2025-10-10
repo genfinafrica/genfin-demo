@@ -55,7 +55,7 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                 
                 {/* --- VALID FIX: INSERT TOTAL DISBURSED HERE --- */}
                 <div style={{ padding: '10px', borderRight: '1px solid #ddd' }}>
-                    <strong>Disbursed: ${totalDisbursed.toFixed(2)}</strong>
+                    <strong>Total Disbursed Amount: ${totalDisbursed.toFixed(2)}</strong>
                     <br />
                     Contract: {contractState}
                     <button className="btn-view" onClick={() => setShowContractModal(true)} style={{ marginLeft: '10px' }}>
