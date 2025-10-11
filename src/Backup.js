@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
@@ -29,7 +28,56 @@ const Modal = ({ show, onClose, title, children }) => {
     );
 };
 
+// --- NEW KPI & CHART COMPONENTS ---
+const KpiGrid = ({ kpis }) => {
+    if (!kpis || kpis.length === 0) {
+        return <p>Loading KPIs...</p>;
+    }
+    return (
+        <div className="kpi-grid">
+            {kpis.map((kpi, index) => (
+                <div key={index} className="kpi-card">
+                    <div className="kpi-value">{kpi.value}</div>
+                    <div className="kpi-label">{kpi.label}</div>
+                </div>
+            ))}
+        </div>
+    );
+};
 
+// --- MODIFIED BarChart Component ---
+const BarChart = ({ title, data }) => {
+    if (!data || Object.keys(data).length === 0) {
+        return <p>No stage data to display.</p>;
+    }
+
+    const maxValue = Math.max(...Object.values(data), 1); // Avoid division by zero
+    
+    return (
+        <div className="bar-chart-container">
+            <h4>{title}</h4>
+            <div className="bar-chart">
+                {Object.entries(data).map(([label, value]) => {
+                    // Shorten the label to just "S1", "S2", etc. for display
+                    const shortLabel = label.split(':')[0].replace('Stage ', 'S');
+                    return (
+                        <div className="bar-chart-item" key={label} title={`${label}: ${value} Farmers`}>
+                            <div className="bar-wrapper">
+                                <div 
+                                    className="bar"
+                                    style={{ height: `${(value / maxValue) * 100}%` }}
+                                >
+                                    <span className="bar-value">{value}</span>
+                                </div>
+                            </div>
+                            <div className="bar-label">{shortLabel}</div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
 
 
 // --- DASHBOARD COMPONENTS ---
@@ -405,6 +453,9 @@ const FarmerChatbotMock = ({ setView }) => {
                 const claimStatus = data.insurance_claim_status || 'UNKNOWN';
                 const triggerText = data.insurance_triggered ? '⚠️ Triggered' : 'No trigger';
                 statusMessage += `🌤️ **Insurance Policy:** Active | Claim status: ${claimStatus} | ${triggerText}\n\n`;
+                if (data.insurance_payout_amount > 0) {
+                    statusMessage += `💸 **Insurance Payout:** $${data.insurance_payout_amount.toFixed(2)} received.\n`;
+                }
             } else {
                 statusMessage += `🌤️ **Insurance Policy:** Not yet activated — complete Stage 3 to enable drought cover.\n\n`;
             }
@@ -776,6 +827,7 @@ const LenderDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmerId, setSelectedFarmerId] = useState(null);
     const [farmerData, setFarmerData] = useState(null);
+    const [kpis, setKpis] = useState([]);
 
     const fetchFarmers = async () => {
         try {
@@ -785,6 +837,23 @@ const LenderDashboard = ({ setView }) => {
             console.error("Error fetching farmers:", error);
         }
     };
+
+    const fetchKpis = async () => {
+        try {
+            const { data } = await axios.get(`${API_BASE_URL}/api/lender/kpis`);
+            const formattedKpis = [
+                { label: 'Total Loans Disbursed', value: data.total_loans_disbursed },
+                { label: 'Total Value of Loans', value: `$${data.total_value_disbursed.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+                { label: 'Total Defaults', value: data.total_defaults },
+                { label: 'Total Value of Defaults', value: `$${data.total_value_defaults.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+                { label: 'Default Ratio', value: `${data.default_ratio.toFixed(2)}%` }
+            ];
+            setKpis(formattedKpis);
+        } catch (error) {
+            console.error("Error fetching lender KPIs:", error);
+        }
+    };
+
     const fetchFarmerDetails = async (id) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
@@ -799,7 +868,8 @@ const LenderDashboard = ({ setView }) => {
         try {
             await axios.post(`${API_BASE_URL}/api/lender/disburse/${selectedFarmerId}/${stageNumber}`);
             await fetchFarmerDetails(selectedFarmerId);
-            await fetchFarmers();
+            await fetchFarmers(); // Refresh list to update summary data
+            await fetchKpis(); // Refresh KPIs after disbursement
         } catch (error) {
             alert(error.response?.data?.message || "Disbursement failed.");
         }
@@ -807,6 +877,7 @@ const LenderDashboard = ({ setView }) => {
 
     useEffect(() => {
         fetchFarmers();
+        fetchKpis();
     }, []);
 
     if (!selectedFarmerId || !farmerData) {
@@ -814,6 +885,8 @@ const LenderDashboard = ({ setView }) => {
             <div className="dashboard-list-container">
                 <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Lender/Admin Dashboard</h2>
+                <KpiGrid kpis={kpis} />
+                <h3 style={{marginTop: '30px'}}>Farmer Portfolio</h3>
                 <p>Select a farmer to view progress and disburse funds.</p>
                 {farmers.map((farmer) => (
                     <div key={farmer.id} className="farmer-card">
@@ -869,6 +942,8 @@ const FieldOfficerDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmerId, setSelectedFarmerId] = useState(null);
     const [farmerData, setFarmerData] = useState(null);
+    const [kpis, setKpis] = useState(null);
+
     const fetchFarmers = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/admin/farmers`);
@@ -877,6 +952,16 @@ const FieldOfficerDashboard = ({ setView }) => {
             console.error("Error fetching farmers:", error);
         }
     };
+
+    const fetchKpis = async () => {
+        try {
+            const { data } = await axios.get(`${API_BASE_URL}/api/field-officer/kpis`);
+            setKpis(data);
+        } catch (error) {
+            console.error("Error fetching field officer KPIs:", error);
+        }
+    };
+
     const fetchFarmerDetails = async (id) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
@@ -893,6 +978,7 @@ const FieldOfficerDashboard = ({ setView }) => {
             alert(response.data.message);
             await fetchFarmerDetails(selectedFarmerId);
             await fetchFarmers();
+            await fetchKpis(); // Refresh KPIs
         } catch (error) {
             alert(error.response?.data?.message || "Approval failed.");
         }
@@ -909,12 +995,23 @@ const FieldOfficerDashboard = ({ setView }) => {
     };
     useEffect(() => {
         fetchFarmers();
+        fetchKpis();
     }, []);
     if (!selectedFarmerId || !farmerData) {
         return (
             <div className="dashboard-list-container">
                 <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Field Officer Dashboard</h2>
+                {kpis ? (
+                    <>
+                        <KpiGrid kpis={[
+                            { label: 'Total Farmers', value: kpis.num_farmers },
+                            { label: 'Pending Approvals', value: kpis.pending_approvals }
+                        ]} />
+                        <BarChart title="Current Farmer Stage Distribution" data={kpis.stage_distribution} />
+                    </>
+                ) : <p>Loading dashboard...</p>}
+                <h3 style={{marginTop: '30px'}}>Farmer List</h3>
                 <p>Select a farmer to view milestones and approve stages.</p>
                 {farmers.map((farmer) => (
                     <div key={farmer.id} className="farmer-card">
@@ -966,19 +1063,46 @@ const InsurerDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmerId, setSelectedFarmerId] = useState(null);
     const [farmerData, setFarmerData] = useState(null);
+    const [kpis, setKpis] = useState([]);
+
     const fetchInsurerFarmers = async () => { try { const response = await axios.get(`${API_BASE_URL}/api/insurer/farmers`); setFarmers(response.data); } catch (error) { console.error("Error fetching insurer-relevant farmers:", error); } };
+    
+    const fetchKpis = async () => {
+        try {
+            const { data } = await axios.get(`${API_BASE_URL}/api/insurer/kpis`);
+            const formattedKpis = [
+                { label: 'Total Policies', value: data.total_policies },
+                { label: 'Total Value of Policies (Premiums)', value: `$${data.total_value_policies.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+                { label: 'Total Claims', value: data.total_claims },
+                { label: 'Total Value of Claims', value: `$${data.total_value_claims.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
+                { label: 'Claims Loss Ratio', value: `${data.claims_loss_ratio.toFixed(2)}%` }
+            ];
+            setKpis(formattedKpis);
+        } catch (error) {
+            console.error("Error fetching insurer KPIs:", error);
+        }
+    };
+    
     const fetchFarmerDetails = async (id) => { try { const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`); setFarmerData(response.data); setSelectedFarmerId(id); } catch (error) { console.error("Error fetching farmer details:", error); setFarmerData(null); } };
+    
     const handleReview = async (action) => {
         if (!selectedFarmerId) return;
-        try { const res = await axios.post(`${API_BASE_URL}/api/insurance/${selectedFarmerId}/review`, { action }); alert(res.data.message); await fetchFarmerDetails(selectedFarmerId); await fetchInsurerFarmers(); }
+        try { const res = await axios.post(`${API_BASE_URL}/api/insurance/${selectedFarmerId}/review`, { action }); alert(res.data.message); await fetchFarmerDetails(selectedFarmerId); await fetchInsurerFarmers(); await fetchKpis(); }
         catch (err) { alert(err.response?.data?.message || 'Review failed'); }
     };
-    useEffect(() => { fetchInsurerFarmers(); }, []);
+
+    useEffect(() => { 
+        fetchInsurerFarmers(); 
+        fetchKpis();
+    }, []);
+
     if (!selectedFarmerId || !farmerData) {
         return (
             <div className="dashboard-list-container">
                 <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Insurer Dashboard</h2>
+                <KpiGrid kpis={kpis} />
+                <h3 style={{marginTop: '30px'}}>Policy Holder List</h3>
                 <p>Select a farmer to view and manage their insurance policy.</p>
                 {farmers.map((farmer) => (
                     <div key={farmer.id} className="farmer-card">
