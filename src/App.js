@@ -54,19 +54,28 @@ const BarChart = ({ title, data }) => {
     const maxValue = Math.max(...Object.values(data), 1); // Avoid division by zero
     
     return (
-      // App.js (Replace the old bar-chart-container block in FieldOfficerDashboard)
-
-/* --- Matplotlib Bar Chart Image for Stages --- */
-<div className="bar-chart-container" style={{ textAlign: 'center' }}>
-    <img 
-        src={`${API_BASE_URL}/api/v1/chart/farmer-stage-barchart.png?t=${new Date().getTime()}`} 
-        alt="Farmers by Financing Stage Bar Chart" 
-        style={{ maxWidth: '100%', height: 'auto', border: '1px solid #dee2e6', borderRadius: '4px' }}
-    />
-    <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#6c757d' }}>*Chart generated dynamically using Matplotlib in Python backend.</p>
-</div>
-/* ----------------------------------------------- */
-  
+        <div className="bar-chart-container">
+            <h4>{title}</h4>
+            <div className="bar-chart">
+                {Object.entries(data).map(([label, value]) => {
+                    // Shorten the label to just "S1", "S2", etc. for display
+                    const shortLabel = label.split(':')[0].replace('Stage ', 'S');
+                    return (
+                        <div className="bar-chart-item" key={label} title={`${label}: ${value} Farmers`}>
+                            <div className="bar-wrapper">
+                                <div 
+                                    className="bar"
+                                    style={{ height: `${(value / maxValue) * 100}%` }}
+                                >
+                                    <span className="bar-value">{value}</span>
+                                </div>
+                            </div>
+                            <div className="bar-label">{shortLabel}</div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
     );
 };
 
