@@ -6,6 +6,9 @@ import hashlib
 import math
 from datetime import datetime, timedelta
 from io import BytesIO
+import matplotlib.pyplot as plt
+import io
+import base64
 
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
@@ -316,7 +319,7 @@ def create_app(test_config=None):
         insurance_payout_amount = 0
         if latest_policy and latest_policy.status in ['CLAIM_APPROVED', 'CLAIMED']:
             total_potential_loan = db.session.query(func.sum(LoanStage.disbursement_amount)).filter(LoanStage.season_id == season.id).scalar() or 0.0
-            insurance_payout_amount = total_potential_loan * 0.70 # Same logic as KPI endpoint
+            insurance_payout_amount = total_potential_loan * 0.10 # Same logic as KPI endpoint
 
         # Build response
         status_data = {
@@ -760,7 +763,7 @@ def create_app(test_config=None):
         total_value_claims = 0
         if approved_claim_seasons:
             total_potential_loan_for_claims = db.session.query(func.sum(LoanStage.disbursement_amount)).filter(LoanStage.season_id.in_(approved_claim_seasons)).scalar() or 0.0
-            total_value_claims = total_potential_loan_for_claims * 0.70 # Mock 70% payout of the total loan value (sum insured).
+            total_value_claims = total_potential_loan_for_claims * 0.10 # Mock 70% payout of the total loan value (sum insured).
 
         claims_loss_ratio = (total_value_claims / total_value_policies) * 100 if total_value_policies > 0 else 0
 
@@ -795,11 +798,36 @@ def create_app(test_config=None):
 
         stage_distribution = {name: count for name, count in stage_distribution_query}
 
+        sorted_stages = sorted(stage_distribution.keys(), key=lambda x: int(x.split()[1][:-1]))  # Extract '1:' -> '1'
+
+        # Short labels: S1, S2, etc.
+        labels = ['S' + str(int(name.split()[1][:-1])) for name in sorted_stages]
+        values = [stage_distribution[name] for name in sorted_stages]
+
+        # Generate matplotlib bar chart
+        fig, ax = plt.subplots(figsize=(8, 4))  # Adjust size as needed
+        ax.bar(labels, values, color='#17a2b8')  # Field officer color
+        ax.set_xlabel('Stages (Left to Right: Progression)')
+        ax.set_ylabel('Number of Farmers')
+        ax.set_title('Current Farmer Stage Distribution')
+        ax.grid(axis='y', linestyle='--', alpha=0.7)
+
+        # Save to buffer as PNG
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        base64_img = base64.b64encode(buf.read()).decode('utf-8')
+        plt.close(fig)  # Clean up
+
+        # Add to response
         return jsonify({
-            'num_farmers': num_farmers,
-            'pending_approvals': pending_approvals,
-            'stage_distribution': stage_distribution
-        })
+        'num_farmers': num_farmers,
+        'pending_approvals': pending_approvals,
+        'stage_distribution': stage_distribution,
+        'stage_chart_base64': base64_img  # New key
+    })
+
+
 
 
     @app.route('/api/report/farmer/<int:farmer_id>', methods=['GET'])
