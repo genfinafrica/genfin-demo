@@ -567,3 +567,12 @@ button:hover,
   font-size: 0.9em;
   font-weight: bold;
 }
+
+@keyframes bleep {
+  0%, 100% { background-color: #fff; }
+  50% { background-color: #ffe5e5; } /* Light pastel red */
+}
+
+.farmer-card.bleep {
+  animation: bleep 1.5s infinite;
+}
