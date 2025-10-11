@@ -399,20 +399,14 @@ button:hover,
 }
 
 /* --- FAQ CONTENT STYLES --- */
-
-/* Clean up the main container now that it's inside a dashboard card */
-/* Find and REPLACE this style block */
 .faq-container {
-    width: 100%; /* Ensures it fills the space given by the dashboard */
-    box-sizing: border-box; /* CRITICAL: Ensures padding/border is calculated INWARD */
+    width: 100%;
+    box-sizing: border-box;
     margin-top: 10px; 
     padding: 0;
     border-top: none; 
     text-align: left;
 }
-
-
-/* Find and REPLACE this style block */
 .faq-intro {
     display: flex;
     gap: 20px;
@@ -420,34 +414,25 @@ button:hover,
     padding: 15px;
     background-color: #f7f9fc;
     border-radius: 8px;
-    
-    /* FIX: ALLOWS CONTENT TO WRAP ON SMALLER SCREENS */
     flex-wrap: wrap; 
 }
-
-/* FIX: Ensures the image and text block respect the flex container limits */
 .faq-image {
     max-width: 300px;
     height: auto;
     border-radius: 4px;
     flex-shrink: 0; 
 }
-
 .faq-intro p {
     flex-grow: 1;
-    /* Ensures the text block has a minimum width before it forces the flex row to overflow */
     min-width: 250px; 
     font-size: 0.95em;
     line-height: 1.5;
 }
-
-
 .faq-details {
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 6px;
 }
-
 .faq-details summary {
     font-size: 1.1em;
     font-weight: bold;
@@ -455,68 +440,51 @@ button:hover,
     cursor: pointer;
     background-color: #eef2f8;
     border-radius: 6px;
-    list-style: none; /* Remove default marker */
+    list-style: none;
 }
-
-.faq-details summary::-webkit-details-marker {
-    display: none;
-}
-
-.faq-details summary:hover {
-    background-color: #e5ebf5;
-}
-
+.faq-details summary::-webkit-details-marker { display: none; }
+.faq-details summary:hover { background-color: #e5ebf5; }
 .faq-content {
     padding: 10px 15px 15px 15px;
     border-top: 1px solid #eee;
 }
-
 .faq-content h4 {
     color: #444;
     font-size: 1em;
     margin-top: 10px;
     margin-bottom: 5px;
 }
-
 .faq-content p {
     margin-left: 15px;
     font-size: 0.9em;
 }
-
 .faq-content table {
     width: 100%;
     border-collapse: collapse;
     margin: 15px 0;
     font-size: 0.9em;
 }
-
 .faq-content th, .faq-content td {
     border: 1px solid #ccc;
     padding: 8px;
     text-align: left;
 }
-
-/* --- FIX FOR OVERFLOWING TABLE IN FAQ --- */
 .table-scroll-wrapper {
-    /* CRITICAL: Allows the inner table to overflow the parent container's width */
     overflow-x: auto; 
-    /* Ensures the wrapper itself uses the full available width */
     width: 100%; 
-    margin: 15px 0; /* Ensures separation from surrounding text */
+    margin: 15px 0;
 }
-
-/* Ensure the table itself doesn't try to shrink */
 .table-scroll-wrapper table {
-    /* Prevents the browser from trying to compress the columns too much */
     min-width: 500px; 
-    width: auto; /* Allow the table to stretch naturally */
+    width: auto;
 }
 
-/* --- *** NEW KPI STYLES *** --- */
+/* --- MODIFICATION: Compact KPI Card Styles --- */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
+  /* Make cards smaller on mobile by default */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px; /* Reduced gap */
   margin-top: 20px;
   width: 100%;
 }
@@ -525,25 +493,25 @@ button:hover,
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 8px;
-  padding: 20px;
+  padding: 15px; /* Reduced padding */
   text-align: center;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .kpi-value {
-  font-size: 2em;
+  font-size: 1.75em; /* Reduced font size */
   font-weight: bold;
-  color: #007bff; /* Primary color for emphasis */
+  color: #007bff;
   margin: 0;
 }
 
 .kpi-label {
-  font-size: 0.9em;
-  color: #6c757d; /* Muted color for the label */
+  font-size: 0.8em; /* Reduced font size */
+  color: #6c757d;
   margin-top: 5px;
 }
 
-/* --- Bar Chart Styles --- */
+/* --- Bar Chart Styles (Fix) --- */
 .bar-chart-container {
   margin-top: 40px;
   padding: 20px;
@@ -555,7 +523,7 @@ button:hover,
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
-  height: 200px;
+  height: 150px; /* Reduced height */
   margin-top: 10px;
 }
 
@@ -563,17 +531,20 @@ button:hover,
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex-basis: 0;
   flex-grow: 1;
+  text-align: center;
 }
 
 .bar-label {
   font-size: 0.8em;
   margin-top: 5px;
+  word-wrap: break-word; /* Ensure even short labels wrap if needed */
 }
 
 .bar-wrapper {
   height: 100%;
-  width: 50%;
+  width: 70%; /* Give bars more width */
   display: flex;
   align-items: flex-end;
   position: relative;
