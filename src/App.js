@@ -12,13 +12,6 @@ const README_URL = "https://github.com/genfinafrica/genfin-demo/blob/main/README
 
 // --- UTILITY COMPONENTS ---
 
-const needsAction = (farmer) => {
-  if (!farmer || !farmer.stages) return false;
-  return farmer.stages.some(stage =>
-    ['UNLOCKED', 'PENDING', 'APPROVED'].includes(stage.status)
-  );
-};
-
 // Generic Modal Component
 const Modal = ({ show, onClose, title, children }) => {
     if (!show) {
@@ -880,6 +873,11 @@ const LenderDashboard = ({ setView }) => {
                 <h3 style={{marginTop: '30px'}}>Farmer Portfolio</h3>
                 <p>Select a farmer to view progress and disburse funds.</p>
                 {farmers.map((farmer) => (
+                  const needsAction = (farmer) => {
+                    return farmer?.stages?.some(stage =>
+                      ['UNLOCKED', 'PENDING', 'APPROVED'].includes(stage.status)
+                     );
+                    };
                     <div key={farmer.id} className={`farmer-card ${needsAction(farmer) ? 'bleep' : ''}`}>
                         <div>
                             <strong>{farmer.name} (ID: {farmer.id})</strong><br/>
@@ -1005,6 +1003,11 @@ const FieldOfficerDashboard = ({ setView }) => {
                 <h3 style={{marginTop: '30px'}}>Farmer List</h3>
                 <p>Select a farmer to view milestones and approve stages.</p>
                 {farmers.map((farmer) => (
+                  const needsAction = (farmer) => {
+                    return farmer?.stages?.some(stage =>
+                      ['UNLOCKED', 'PENDING', 'APPROVED'].includes(stage.status)
+                     );
+                    };
                     <div key={farmer.id} className={`farmer-card ${needsAction(farmer) ? 'bleep' : ''}`}>  <div>
                             <strong>{farmer.name} (ID: {farmer.id})</strong><br/>
                             <span>Completed Stages: {farmer.stages_completed} | Score: {farmer.score}</span>
@@ -1095,6 +1098,11 @@ const InsurerDashboard = ({ setView }) => {
                 <h3 style={{marginTop: '30px'}}>Policy Holder List</h3>
                 <p>Select a farmer to view and manage their insurance policy.</p>
                 {farmers.map((farmer) => (
+                  const needsAction = (farmer) => {
+                    return farmer?.stages?.some(stage =>
+                      ['UNLOCKED', 'PENDING', 'APPROVED'].includes(stage.status)
+                     );
+                    };
                     <div key={farmer.id} className={`farmer-card ${needsAction(farmer) ? 'bleep' : ''}`}>
                         <div><strong>{farmer.name} (ID: {farmer.id})</strong><br /><span>Policy Status: {farmer.policy_status} | Score: {farmer.score}</span></div>
                         <button className="btn-view" onClick={() => fetchFarmerDetails(farmer.id)}>View Policy</button>
