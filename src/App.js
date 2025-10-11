@@ -45,31 +45,35 @@ const KpiGrid = ({ kpis }) => {
     );
 };
 
+// --- MODIFIED BarChart Component ---
 const BarChart = ({ title, data }) => {
     if (!data || Object.keys(data).length === 0) {
         return <p>No stage data to display.</p>;
     }
 
-    const maxValue = Math.max(...Object.values(data));
+    const maxValue = Math.max(...Object.values(data), 1); // Avoid division by zero
     
     return (
         <div className="bar-chart-container">
             <h4>{title}</h4>
             <div className="bar-chart">
-                {Object.entries(data).map(([label, value]) => (
-                    <div className="bar-chart-item" key={label}>
-                        <div className="bar-label">{label.replace('Stage ', 'S')}</div>
-                        <div className="bar-wrapper">
-                            <div 
-                                className="bar"
-                                style={{ height: `${(value / maxValue) * 100}%` }}
-                                title={`${value} Farmers`}
-                            >
-                                <span className="bar-value">{value}</span>
+                {Object.entries(data).map(([label, value]) => {
+                    // Shorten the label to just "S1", "S2", etc. for display
+                    const shortLabel = label.split(':')[0].replace('Stage ', 'S');
+                    return (
+                        <div className="bar-chart-item" key={label} title={`${label}: ${value} Farmers`}>
+                            <div className="bar-wrapper">
+                                <div 
+                                    className="bar"
+                                    style={{ height: `${(value / maxValue) * 100}%` }}
+                                >
+                                    <span className="bar-value">{value}</span>
+                                </div>
                             </div>
+                            <div className="bar-label">{shortLabel}</div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
@@ -449,6 +453,9 @@ const FarmerChatbotMock = ({ setView }) => {
                 const claimStatus = data.insurance_claim_status || 'UNKNOWN';
                 const triggerText = data.insurance_triggered ? '⚠️ Triggered' : 'No trigger';
                 statusMessage += `🌤️ **Insurance Policy:** Active | Claim status: ${claimStatus} | ${triggerText}\n\n`;
+                if (data.insurance_payout_amount > 0) {
+                    statusMessage += `💸 **Insurance Payout:** $${data.insurance_payout_amount.toFixed(2)} received.\n`;
+                }
             } else {
                 statusMessage += `🌤️ **Insurance Policy:** Not yet activated — complete Stage 3 to enable drought cover.\n\n`;
             }
