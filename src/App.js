@@ -47,34 +47,18 @@ const KpiGrid = ({ kpis }) => {
 
 // --- MODIFIED BarChart Component ---
 const BarChart = ({ title, data }) => {
-    if (!data || Object.keys(data).length === 0) {
+    if (!data) {
         return <p>No stage data to display.</p>;
     }
-
-    const maxValue = Math.max(...Object.values(data), 1); // Avoid division by zero
     
     return (
         <div className="bar-chart-container">
             <h4>{title}</h4>
-            <div className="bar-chart">
-                {Object.entries(data).map(([label, value]) => {
-                    // Shorten the label to just "S1", "S2", etc. for display
-                    const shortLabel = label.split(':')[0].replace('Stage ', 'S');
-                    return (
-                        <div className="bar-chart-item" key={label} title={`${label}: ${value} Farmers`}>
-                            <div className="bar-wrapper">
-                                <div 
-                                    className="bar"
-                                    style={{ height: `${(value / maxValue) * 100}%` }}
-                                >
-                                    <span className="bar-value">{value}</span>
-                                </div>
-                            </div>
-                            <div className="bar-label">{shortLabel}</div>
-                        </div>
-                    );
-                })}
-            </div>
+            <img 
+                src={`data:image/png;base64,${data}`} 
+                alt="Farmer Stage Distribution Chart" 
+                style={{ width: '100%', height: 'auto' }} 
+            />
         </div>
     );
 };
@@ -1008,7 +992,7 @@ const FieldOfficerDashboard = ({ setView }) => {
                             { label: 'Total Farmers', value: kpis.num_farmers },
                             { label: 'Pending Approvals', value: kpis.pending_approvals }
                         ]} />
-                        <BarChart title="Current Farmer Stage Distribution" data={kpis.stage_distribution} />
+                        <BarChart title="Current Farmer Stage Distribution" data={kpis.stage_chart_base64} />
                     </>
                 ) : <p>Loading dashboard...</p>}
                 <h3 style={{marginTop: '30px'}}>Farmer List</h3>
