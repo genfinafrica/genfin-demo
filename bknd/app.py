@@ -312,6 +312,12 @@ def create_app(test_config=None):
         latest_contract = season.contracts[-1] if season.contracts else None
         latest_policy = season.policies[-1] if season.policies else None
 
+        # --- MODIFICATION: Calculate individual insurance payout ---
+        insurance_payout_amount = 0
+        if latest_policy and latest_policy.status in ['CLAIM_APPROVED', 'CLAIMED']:
+            total_potential_loan = db.session.query(func.sum(LoanStage.disbursement_amount)).filter(LoanStage.season_id == season.id).scalar() or 0.0
+            insurance_payout_amount = total_potential_loan * 0.70 # Same logic as KPI endpoint
+
         # Build response
         status_data = {
             'farmer_id': farmer.id,
@@ -337,7 +343,6 @@ def create_app(test_config=None):
             ],
             'contract_state': latest_contract.state if latest_contract else 'N/A',
             'contract_hash': latest_contract.hash_value if latest_contract else 'N/A',
-            # +++ ADDED FULL CONTRACT HISTORY FOR AUDIT TRAIL MODAL +++
             'contract_history': [
                 {
                     'timestamp': c.timestamp.isoformat(),
@@ -346,10 +351,10 @@ def create_app(test_config=None):
                 } for c in sorted(season.contracts, key=lambda c: c.timestamp)
             ] if season.contracts else [],
             'policy_id': latest_policy.policy_id if latest_policy else None,
-            # --- NEW: insurance enrichment ---
             'has_insurance': True if latest_policy else False,
             'insurance_claim_status': latest_policy.status if latest_policy else None,
-            'insurance_triggered': True if latest_policy and (latest_policy.status and 'CLAIM' in latest_policy.status.upper()) else False
+            'insurance_triggered': True if latest_policy and (latest_policy.status and 'CLAIM' in latest_policy.status.upper()) else False,
+            'insurance_payout_amount': insurance_payout_amount # Add new key to response
         }
         return jsonify(status_data)
 
@@ -748,12 +753,14 @@ def create_app(test_config=None):
 
         total_claims = Policy.query.filter(Policy.status.in_(['CLAIM_APPROVED', 'CLAIMED'])).count()
 
-        # Simulate claim value: 30% of the total potential loan for each approved claim
+        # *** MODIFIED LOGIC ***
+        # Simulate claim value: 70% of the total potential loan for each approved claim, representing a more realistic payout.
+        # The total potential loan acts as the "sum insured".
         approved_claim_seasons = [p.season_id for p in Policy.query.filter(Policy.status.in_(['CLAIM_APPROVED', 'CLAIMED'])).all()]
         total_value_claims = 0
         if approved_claim_seasons:
             total_potential_loan_for_claims = db.session.query(func.sum(LoanStage.disbursement_amount)).filter(LoanStage.season_id.in_(approved_claim_seasons)).scalar() or 0.0
-            total_value_claims = total_potential_loan_for_claims * 0.30 # Mock 30% payout of total loan value
+            total_value_claims = total_potential_loan_for_claims * 0.70 # Mock 70% payout of the total loan value (sum insured).
 
         claims_loss_ratio = (total_value_claims / total_value_policies) * 100 if total_value_policies > 0 else 0
 
@@ -831,7 +838,7 @@ def create_app(test_config=None):
             table_xai = Table(xai_data, colWidths=[350, 150])
             table_xai.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesoke),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
