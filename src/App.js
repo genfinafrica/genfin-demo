@@ -962,6 +962,13 @@ const FieldOfficerDashboard = ({ setView }) => {
             console.error("Error fetching farmer details:", error);
         }
     };
+
+    const needsAction = (farmer) => {
+      return farmer?.stages?.some(stage =>
+        ['UNLOCKED', 'PENDING', 'APPROVED'].includes(stage.status)
+     );
+    };
+    
     const handleApprove = async (stageNumber) => {
         if (!farmerData) return;
         try {
@@ -1074,6 +1081,12 @@ const InsurerDashboard = ({ setView }) => {
     };
     
     const fetchFarmerDetails = async (id) => { try { const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`); setFarmerData(response.data); setSelectedFarmerId(id); } catch (error) { console.error("Error fetching farmer details:", error); setFarmerData(null); } };
+
+    const needsAction = (farmer) => {
+      return farmer?.stages?.some(stage =>
+        ['UNLOCKED', 'PENDING', 'APPROVED'].includes(stage.status)
+     );
+    };
     
     const handleReview = async (action) => {
         if (!selectedFarmerId) return;
