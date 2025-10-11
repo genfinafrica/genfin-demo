@@ -1082,10 +1082,9 @@ const InsurerDashboard = ({ setView }) => {
     
     const fetchFarmerDetails = async (id) => { try { const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`); setFarmerData(response.data); setSelectedFarmerId(id); } catch (error) { console.error("Error fetching farmer details:", error); setFarmerData(null); } };
 
-    const needsAction = (farmer) => {
-      return farmer?.stages?.some(stage =>
-        ['UNLOCKED', 'PENDING', 'APPROVED'].includes(stage.status)
-     );
+    const needsInsurerAction = (farmer) => {
+      return farmer?.policy_status ===
+    'CLAIM_PENDING';
     };
     
     const handleReview = async (action) => {
@@ -1108,7 +1107,7 @@ const InsurerDashboard = ({ setView }) => {
                 <h3 style={{marginTop: '30px'}}>Policy Holder List</h3>
                 <p>Select a farmer to view and manage their insurance policy.</p>
                 {farmers.map((farmer) => (
-                    <div key={farmer.id} className={`farmer-card ${needsAction(farmer) ? 'bleep' : ''}`}>
+                    <div key={farmer.id} className={`farmer-card ${needsInsurerAction(farmer) ? 'bleep' : ''}`}>
                         <div><strong>{farmer.name} (ID: {farmer.id})</strong><br /><span>Policy Status: {farmer.policy_status} | Score: {farmer.score}</span></div>
                         <button className="btn-view" onClick={() => fetchFarmerDetails(farmer.id)}>View Policy</button>
                     </div>
