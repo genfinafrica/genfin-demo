@@ -965,7 +965,7 @@ const FieldOfficerDashboard = ({ setView }) => {
 
     const needsAction = (farmer) => {
       return farmer?.stages?.some(stage =>
-        ['UNLOCKED', 'PENDING', 'APPROVED'].includes(stage.status)
+        ['PENDING'].includes(stage.status)
      );
     };
     
