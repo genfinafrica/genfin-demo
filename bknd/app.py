@@ -14,6 +14,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
+from sqlalchemy import func, case
 
 # --- CRITICAL CONFIGURATION ---
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -706,6 +707,93 @@ def create_app(test_config=None):
         db.session.add(policy)
         db.session.commit()
         return jsonify({'message': msg, 'status': policy.status})
+
+    # --- *** NEW KPI ENDPOINTS *** ---
+
+    @app.route('/api/lender/kpis', methods=['GET'])
+    def get_lender_kpis():
+        total_loans_disbursed = db.session.query(func.count(func.distinct(LoanStage.season_id))).filter(LoanStage.status == 'COMPLETED').scalar() or 0
+        total_value_disbursed = db.session.query(func.sum(LoanStage.disbursement_amount)).filter(LoanStage.status == 'COMPLETED').scalar() or 0.0
+
+        # Simulate Defaults: A season is in default if its end_date has passed and not all stages are 'COMPLETED'
+        defaulted_seasons = db.session.query(Season.id).filter(Season.end_date < datetime.utcnow()).except_(
+            db.session.query(Season.id).join(LoanStage).group_by(Season.id).having(func.count(case((LoanStage.status == 'COMPLETED', LoanStage.id))) == 7)
+        ).all()
+        defaulted_season_ids = [s[0] for s in defaulted_seasons]
+
+        total_defaults = len(defaulted_season_ids)
+
+        total_value_defaults = 0
+        if defaulted_season_ids:
+            # Value of default is the *total potential value* of the loan, not just disbursed amount
+            total_value_defaults = db.session.query(func.sum(LoanStage.disbursement_amount)).filter(LoanStage.season_id.in_(defaulted_season_ids)).scalar() or 0.0
+
+        default_ratio = (total_defaults / total_loans_disbursed) * 100 if total_loans_disbursed > 0 else 0
+
+        return jsonify({
+            'total_loans_disbursed': total_loans_disbursed,
+            'total_value_disbursed': total_value_disbursed,
+            'total_defaults': total_defaults,
+            'total_value_defaults': total_value_defaults,
+            'default_ratio': default_ratio
+        })
+
+
+    @app.route('/api/insurer/kpis', methods=['GET'])
+    def get_insurer_kpis():
+        total_policies = Policy.query.filter(Policy.status != 'PENDING').count()
+
+        # Value of policies is the sum of Stage 3 (Insurance Premium) disbursements
+        total_value_policies = db.session.query(func.sum(LoanStage.disbursement_amount)).filter(LoanStage.stage_number == 3, LoanStage.status == 'COMPLETED').scalar() or 0.0
+
+        total_claims = Policy.query.filter(Policy.status.in_(['CLAIM_APPROVED', 'CLAIMED'])).count()
+
+        # Simulate claim value: 30% of the total potential loan for each approved claim
+        approved_claim_seasons = [p.season_id for p in Policy.query.filter(Policy.status.in_(['CLAIM_APPROVED', 'CLAIMED'])).all()]
+        total_value_claims = 0
+        if approved_claim_seasons:
+            total_potential_loan_for_claims = db.session.query(func.sum(LoanStage.disbursement_amount)).filter(LoanStage.season_id.in_(approved_claim_seasons)).scalar() or 0.0
+            total_value_claims = total_potential_loan_for_claims * 0.30 # Mock 30% payout of total loan value
+
+        claims_loss_ratio = (total_value_claims / total_value_policies) * 100 if total_value_policies > 0 else 0
+
+        return jsonify({
+            'total_policies': total_policies,
+            'total_value_policies': total_value_policies,
+            'total_claims': total_claims,
+            'total_value_claims': total_value_claims,
+            'claims_loss_ratio': claims_loss_ratio
+        })
+
+    @app.route('/api/field-officer/kpis', methods=['GET'])
+    def get_field_officer_kpis():
+        num_farmers = Farmer.query.count()
+        pending_approvals = LoanStage.query.filter_by(status='PENDING').count()
+
+        # Get current stage for each farmer (first non-completed stage)
+        # This subquery finds the minimum stage_number for each season that is not 'COMPLETED'
+        subquery = db.session.query(
+            LoanStage.season_id,
+            func.min(LoanStage.stage_number).label('current_stage_num')
+        ).filter(LoanStage.status != 'COMPLETED').group_by(LoanStage.season_id).subquery()
+
+        # Join back to LoanStage to get the name of that stage
+        stage_distribution_query = db.session.query(
+            LoanStage.stage_name,
+            func.count(LoanStage.season_id).label('farmer_count')
+        ).join(
+            subquery,
+            (LoanStage.season_id == subquery.c.season_id) & (LoanStage.stage_number == subquery.c.current_stage_num)
+        ).group_by(LoanStage.stage_name).order_by(LoanStage.stage_name).all()
+
+        stage_distribution = {name: count for name, count in stage_distribution_query}
+
+        return jsonify({
+            'num_farmers': num_farmers,
+            'pending_approvals': pending_approvals,
+            'stage_distribution': stage_distribution
+        })
+
 
     @app.route('/api/report/farmer/<int:farmer_id>', methods=['GET'])
     def generate_farmer_report(farmer_id):
