@@ -858,6 +858,7 @@ const LenderDashboard = ({ setView }) => {
         if (!farmerData) return;
         try {
             await axios.post(`${API_BASE_URL}/api/lender/disburse/${selectedFarmerId}/${stageNumber}`);
+            alert(response.data.message);
             await fetchFarmerDetails(selectedFarmerId);
             await fetchFarmers(); // Refresh list to update summary data
             await fetchKpis(); // Refresh KPIs after disbursement
