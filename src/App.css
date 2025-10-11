@@ -499,7 +499,7 @@ button:hover,
 }
 
 .kpi-value {
-  font-size: 1.75em; /* Reduced font size */
+  font-size: 1.0em; /* Reduced font size */
   font-weight: bold;
   color: #007bff;
   margin: 0;
