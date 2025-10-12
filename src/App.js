@@ -887,7 +887,7 @@ const LenderDashboard = ({ setView }) => {
                 <p>Loading KPIs... <span className="spinner"></span></p> 
                 ) : (
                 <p>Could not load dashboard data.</p>
-               )
+                )
                 <h3 style={{marginTop: '30px'}}>Farmer Portfolio</h3>
                 <p>Select a farmer to view progress and disburse funds.</p>
                 {farmers.map((farmer) => (
@@ -1133,7 +1133,7 @@ const InsurerDashboard = ({ setView }) => {
                 <p>Loading KPIs... <span className="spinner"></span></p> 
                 ) : (
                 <p>Could not load dashboard data.</p>
-               )
+                )
                 <h3 style={{marginTop: '30px'}}>Policy Holder List</h3>
                 <p>Select a farmer to view and manage their insurance policy.</p>
                 {farmers.map((farmer) => (
