@@ -811,7 +811,7 @@ const LenderDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmerId, setSelectedFarmerId] = useState(null);
     const [farmerData, setFarmerData] = useState(null);
-    const [kpis, setKpis] = useState([]);
+    const [kpis, setKpis] = useState(null);
 
     const fetchFarmers = async () => {
         try {
@@ -822,9 +822,13 @@ const LenderDashboard = ({ setView }) => {
         }
     };
 
+    const [isLoading, setIsLoading] = useState(false);
+ 
     const fetchKpis = async () => {
         try {
+            setIsLoading(true);
             const { data } = await axios.get(`${API_BASE_URL}/api/lender/kpis`);
+            await new Promise(resolve => setTimeout(resolve, 500));
             const formattedKpis = [
                 { label: 'Total Loans Disbursed', value: data.total_loans_disbursed },
                 { label: 'Total Value of Loans', value: `$${data.total_value_disbursed.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
@@ -835,9 +839,11 @@ const LenderDashboard = ({ setView }) => {
             setKpis(formattedKpis);
         } catch (error) {
             console.error("Error fetching lender KPIs:", error);
+        }finally{
+            setIsLoading(false)
         }
     };
-
+    
     const fetchFarmerDetails = async (id) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
@@ -877,7 +883,13 @@ const LenderDashboard = ({ setView }) => {
             <div className="dashboard-list-container">
                 <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Lender/Admin Dashboard</h2>
+               {kpis ? (
                 <KpiGrid kpis={kpis} />
+                ) : isLoading ? (
+                <p>Loading KPIs... <span className="spinner"></span></p> 
+                ) : (
+                <p>Could not load dashboard data.</p>
+                )}
                 <h3 style={{marginTop: '30px'}}>Farmer Portfolio</h3>
                 <p>Select a farmer to view progress and disburse funds.</p>
                 {farmers.map((farmer) => (
@@ -945,14 +957,20 @@ const FieldOfficerDashboard = ({ setView }) => {
         }
     };
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const fetchKpis = async () => {
-        try {
-            const { data } = await axios.get(`${API_BASE_URL}/api/field-officer/kpis`);
-            setKpis(data);
-        } catch (error) {
-            console.error("Error fetching field officer KPIs:", error);
-        }
-    };
+    try {
+        setIsLoading(true); // START loading
+        const { data } = await axios.get(`${API_BASE_URL}/api/field-officer/kpis`);
+        setKpis(data);
+    } catch (error) {
+        console.error("Error fetching lender KPIs:", error);
+    } finally {
+        setIsLoading(false); // STOP loading
+    }
+};
+    
 
     const fetchFarmerDetails = async (id) => {
         try {
@@ -1009,7 +1027,11 @@ const FieldOfficerDashboard = ({ setView }) => {
                         ]} />
                         <BarChart title="Current Farmer Stage Distribution" data={kpis.stage_chart_base64} />
                     </>
-                ) : <p>Loading dashboard...</p>}
+                ) : isLoading ? (
+                <p>Loading KPIs... <span className="spinner"></span></p> 
+                ) : (
+                <p>Could not load dashboard data.</p>
+               )}
                 <h3 style={{marginTop: '30px'}}>Farmer List</h3>
                 <p>Select a farmer to view milestones and approve stages.</p>
                 {farmers.map((farmer) => (
@@ -1061,13 +1083,17 @@ const InsurerDashboard = ({ setView }) => {
     const [farmers, setFarmers] = useState([]);
     const [selectedFarmerId, setSelectedFarmerId] = useState(null);
     const [farmerData, setFarmerData] = useState(null);
-    const [kpis, setKpis] = useState([]);
+    const [kpis, setKpis] = useState(null);
 
     const fetchInsurerFarmers = async () => { try { const response = await axios.get(`${API_BASE_URL}/api/insurer/farmers`); setFarmers(response.data); } catch (error) { console.error("Error fetching insurer-relevant farmers:", error); } };
-    
+
+    const [isLoading, setIsLoading] = useState(false);
+ 
     const fetchKpis = async () => {
         try {
+            setIsLoading(true);
             const { data } = await axios.get(`${API_BASE_URL}/api/insurer/kpis`);
+            await new Promise(resolve => setTimeout(resolve, 500)); //delay
             const formattedKpis = [
                 { label: 'Total Policies', value: data.total_policies },
                 { label: 'Total Value of Policies (Premiums)', value: `$${data.total_value_policies.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
@@ -1078,7 +1104,9 @@ const InsurerDashboard = ({ setView }) => {
             setKpis(formattedKpis);
         } catch (error) {
             console.error("Error fetching insurer KPIs:", error);
-        }
+        }finally{
+            setIsLoading(false);  
+                }
     };
     
     const fetchFarmerDetails = async (id) => { try { const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`); setFarmerData(response.data); setSelectedFarmerId(id); } catch (error) { console.error("Error fetching farmer details:", error); setFarmerData(null); } };
@@ -1104,7 +1132,13 @@ const InsurerDashboard = ({ setView }) => {
             <div className="dashboard-list-container">
                 <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Insurer Dashboard</h2>
+               {kpis ? ( 
                 <KpiGrid kpis={kpis} />
+                ) : isLoading ? (
+                <p>Loading KPIs... <span className="spinner"></span></p> 
+                ) : (
+                <p>Could not load dashboard data.</p>
+                )}
                 <h3 style={{marginTop: '30px'}}>Policy Holder List</h3>
                 <p>Select a farmer to view and manage their insurance policy.</p>
                 {farmers.map((farmer) => (
