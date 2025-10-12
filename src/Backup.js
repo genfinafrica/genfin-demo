@@ -47,34 +47,18 @@ const KpiGrid = ({ kpis }) => {
 
 // --- MODIFIED BarChart Component ---
 const BarChart = ({ title, data }) => {
-    if (!data || Object.keys(data).length === 0) {
+    if (!data) {
         return <p>No stage data to display.</p>;
     }
-
-    const maxValue = Math.max(...Object.values(data), 1); // Avoid division by zero
     
     return (
         <div className="bar-chart-container">
             <h4>{title}</h4>
-            <div className="bar-chart">
-                {Object.entries(data).map(([label, value]) => {
-                    // Shorten the label to just "S1", "S2", etc. for display
-                    const shortLabel = label.split(':')[0].replace('Stage ', 'S');
-                    return (
-                        <div className="bar-chart-item" key={label} title={`${label}: ${value} Farmers`}>
-                            <div className="bar-wrapper">
-                                <div 
-                                    className="bar"
-                                    style={{ height: `${(value / maxValue) * 100}%` }}
-                                >
-                                    <span className="bar-value">{value}</span>
-                                </div>
-                            </div>
-                            <div className="bar-label">{shortLabel}</div>
-                        </div>
-                    );
-                })}
-            </div>
+            <img 
+                src={`data:image/png;base64,${data}`} 
+                alt="Farmer Stage Distribution Chart" 
+                style={{ width: '100%', height: 'auto' }} 
+            />
         </div>
     );
 };
@@ -504,7 +488,7 @@ const FarmerChatbotMock = ({ setView }) => {
       [Simulated Map Component with Dropped Pin]
       <span style="margin-left:10px; color:#dc3545;">📍 Location Dropped: -1.286389, 36.817223</span>
   </div>
-  <p style="margin-top:10px; margin-bottom:0;">Location confirmed automatically. Type NEXT to proceed.</p>
+  <p style="margin-top:10px; margin-bottom:0;">Location confirmed automatically. Type **NEXT** to proceed.</p>
 </div>
 `;
         // --- NEW STEP: LOCATION PIN SIMULATION (INSERT END) ---
@@ -863,10 +847,18 @@ const LenderDashboard = ({ setView }) => {
             console.error("Error fetching farmer details:", error);
         }
     };
+
+    const needsAction = (farmer) => {
+       return farmer?.stages?.some(stage =>
+       ['APPROVED'].includes(stage.status)
+     );
+    };
+    
     const handleDisburse = async (stageNumber) => {
         if (!farmerData) return;
         try {
             await axios.post(`${API_BASE_URL}/api/lender/disburse/${selectedFarmerId}/${stageNumber}`);
+            alert(response.data.message);
             await fetchFarmerDetails(selectedFarmerId);
             await fetchFarmers(); // Refresh list to update summary data
             await fetchKpis(); // Refresh KPIs after disbursement
@@ -889,7 +881,7 @@ const LenderDashboard = ({ setView }) => {
                 <h3 style={{marginTop: '30px'}}>Farmer Portfolio</h3>
                 <p>Select a farmer to view progress and disburse funds.</p>
                 {farmers.map((farmer) => (
-                    <div key={farmer.id} className="farmer-card">
+                    <div key={farmer.id} className={`farmer-card ${needsAction(farmer) ? 'bleep' : ''}`}>
                         <div>
                             <strong>{farmer.name} (ID: {farmer.id})</strong><br/>
                             <span>Completed Stages: {farmer.stages_completed} | Score: {farmer.score}</span>
@@ -971,6 +963,13 @@ const FieldOfficerDashboard = ({ setView }) => {
             console.error("Error fetching farmer details:", error);
         }
     };
+
+    const needsAction = (farmer) => {
+      return farmer?.stages?.some(stage =>
+        ['PENDING'].includes(stage.status)
+     );
+    };
+    
     const handleApprove = async (stageNumber) => {
         if (!farmerData) return;
         try {
@@ -1008,14 +1007,13 @@ const FieldOfficerDashboard = ({ setView }) => {
                             { label: 'Total Farmers', value: kpis.num_farmers },
                             { label: 'Pending Approvals', value: kpis.pending_approvals }
                         ]} />
-                        <BarChart title="Current Farmer Stage Distribution" data={kpis.stage_distribution} />
+                        <BarChart title="Current Farmer Stage Distribution" data={kpis.stage_chart_base64} />
                     </>
                 ) : <p>Loading dashboard...</p>}
                 <h3 style={{marginTop: '30px'}}>Farmer List</h3>
                 <p>Select a farmer to view milestones and approve stages.</p>
                 {farmers.map((farmer) => (
-                    <div key={farmer.id} className="farmer-card">
-                        <div>
+                    <div key={farmer.id} className={`farmer-card ${needsAction(farmer) ? 'bleep' : ''}`}>  <div>
                             <strong>{farmer.name} (ID: {farmer.id})</strong><br/>
                             <span>Completed Stages: {farmer.stages_completed} | Score: {farmer.score}</span>
                         </div>
@@ -1084,6 +1082,11 @@ const InsurerDashboard = ({ setView }) => {
     };
     
     const fetchFarmerDetails = async (id) => { try { const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`); setFarmerData(response.data); setSelectedFarmerId(id); } catch (error) { console.error("Error fetching farmer details:", error); setFarmerData(null); } };
+
+    const needsInsurerAction = (farmer) => {
+      return farmer?.policy_status ===
+    'CLAIM_PENDING';
+    };
     
     const handleReview = async (action) => {
         if (!selectedFarmerId) return;
@@ -1105,7 +1108,7 @@ const InsurerDashboard = ({ setView }) => {
                 <h3 style={{marginTop: '30px'}}>Policy Holder List</h3>
                 <p>Select a farmer to view and manage their insurance policy.</p>
                 {farmers.map((farmer) => (
-                    <div key={farmer.id} className="farmer-card">
+                    <div key={farmer.id} className={`farmer-card ${needsInsurerAction(farmer) ? 'bleep' : ''}`}>
                         <div><strong>{farmer.name} (ID: {farmer.id})</strong><br /><span>Policy Status: {farmer.policy_status} | Score: {farmer.score}</span></div>
                         <button className="btn-view" onClick={() => fetchFarmerDetails(farmer.id)}>View Policy</button>
                     </div>
