@@ -841,7 +841,7 @@ const LenderDashboard = ({ setView }) => {
             console.error("Error fetching lender KPIs:", error);
         }finally{
             setIsLoading(false)
-        }
+        
     };
     
     const fetchFarmerDetails = async (id) => {
@@ -1105,9 +1105,7 @@ const InsurerDashboard = ({ setView }) => {
         } catch (error) {
             console.error("Error fetching insurer KPIs:", error);
         }finally{
-            setIsLoading(false);
-                }
-        
+            setIsLoading(false);  
     };
     
     const fetchFarmerDetails = async (id) => { try { const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`); setFarmerData(response.data); setSelectedFarmerId(id); } catch (error) { console.error("Error fetching farmer details:", error); setFarmerData(null); } };
