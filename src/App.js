@@ -1093,7 +1093,7 @@ const InsurerDashboard = ({ setView }) => {
         try {
             setIsLoading(true);
             const { data } = await axios.get(`${API_BASE_URL}/api/insurer/kpis`);
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 500)); //delay
             const formattedKpis = [
                 { label: 'Total Policies', value: data.total_policies },
                 { label: 'Total Value of Policies (Premiums)', value: `$${data.total_value_policies.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
