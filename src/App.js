@@ -839,6 +839,7 @@ const LenderDashboard = ({ setView }) => {
         } catch (error) {
             console.error("Error fetching lender KPIs:", error);
         }finally{
+            await new Promise(resolve => setTimeout(resolve, 500));
             setIsLoading(false)
         }
     };
@@ -1103,6 +1104,7 @@ const InsurerDashboard = ({ setView }) => {
         } catch (error) {
             console.error("Error fetching insurer KPIs:", error);
         }finally{
+            await new Promise(resolve => setTimeout(resolve, 500));
             setIsLoading(false);
                 }
         
