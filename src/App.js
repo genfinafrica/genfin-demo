@@ -839,8 +839,6 @@ const LenderDashboard = ({ setView }) => {
             console.error("Error fetching lender KPIs:", error);
         }
     };
-
-    const [isLoading, setIsLoading] = useState(false);
     
     const fetchFarmerDetails = async (id) => {
         try {
