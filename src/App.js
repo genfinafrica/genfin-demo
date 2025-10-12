@@ -1018,12 +1018,10 @@ const FieldOfficerDashboard = ({ setView }) => {
                         <BarChart title="Current Farmer Stage Distribution" data={kpis.stage_chart_base64} />
                     </>
                 ) : isLoading ? (
-    // RENDER SPINNER WHEN LOADING
-    <p>Loading KPIs... <span className="spinner"></span></p> 
-) : (
-    // RENDER FAILED MESSAGE WHEN NOT LOADING AND NO DATA
-    <p>Could not load dashboard data.</p>
-)}
+                <p>Loading KPIs... <span className="spinner"></span></p> 
+                ) : (
+                <p>Could not load dashboard data.</p>
+               )}
                 <h3 style={{marginTop: '30px'}}>Farmer List</h3>
                 <p>Select a farmer to view milestones and approve stages.</p>
                 {farmers.map((farmer) => (
