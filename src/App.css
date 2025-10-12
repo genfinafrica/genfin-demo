@@ -576,3 +576,30 @@ button:hover,
 .farmer-card.bleep {
   animation: bleep 1.5s infinite;
 }
+
+/* 1. Define the rotation animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 2. Style the Spinner Element */
+.spinner {
+  /* Dimensions for the spinner */
+  display: inline-block; /* Allows it to sit next to "Loading KPIs..." text */
+  width: 16px; 
+  height: 16px;
+  
+  /* Create the circular shape */
+  border: 2px solid #f3f3f3; /* Light grey border for the circle */
+  border-top: 2px solid #3498db; /* Blue border that creates the "open" effect */
+  border-radius: 50%; /* Makes it a circle */
+  
+  /* Apply the animation */
+  animation: spin 1s linear infinite; /* 1 second rotation, constant speed, runs forever */
+  
+  /* Minimal spacing */
+  margin-left: 5px; 
+  vertical-align: middle; 
+}
+
