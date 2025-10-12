@@ -1079,6 +1079,7 @@ const InsurerDashboard = ({ setView }) => {
     
     const fetchKpis = async () => {
         try {
+            setIsLoading(true);
             const { data } = await axios.get(`${API_BASE_URL}/api/insurer/kpis`);
             const formattedKpis = [
                 { label: 'Total Policies', value: data.total_policies },
@@ -1090,7 +1091,10 @@ const InsurerDashboard = ({ setView }) => {
             setKpis(formattedKpis);
         } catch (error) {
             console.error("Error fetching insurer KPIs:", error);
-        }
+        }finally{
+            setIsLoading(false);
+                }
+        
     };
     
     const fetchFarmerDetails = async (id) => { try { const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`); setFarmerData(response.data); setSelectedFarmerId(id); } catch (error) { console.error("Error fetching farmer details:", error); setFarmerData(null); } };
