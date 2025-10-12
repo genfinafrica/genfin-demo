@@ -374,8 +374,17 @@ def create_app(test_config=None):
                 'name': f.name,
                 'phone': f.phone,
                 'stages_completed': stages_completed,
-                'score': score
+                'score': score,
+                'stages': [
+                    {
+                        'stage_number': s.stage_number,
+                        'status': s.status,
+                        'stage_name': s.stage_name # Including name for good measure
+                    }
+                    for s in season.stages
+                ] if season and season.stages else []
             })
+
         return jsonify(farmer_list)
 
     @app.route('/api/farmer/<int:farmer_id>/upload', methods=['POST'])
@@ -827,6 +836,34 @@ def create_app(test_config=None):
         'stage_chart_base64': base64_img  # New key
     })
 
+    # Add this new function to your App.py file
+
+    @app.route('/api/admin/delete_farmer/<int:farmer_id>', methods=['DELETE'])
+    def delete_farmer(farmer_id):
+        """Admin endpoint to permanently delete a farmer and all related data."""
+        try:
+        # Find the farmer
+          farmer = Farmer.query.get(farmer_id)
+          if not farmer:
+              return jsonify({'message': f'Farmer with ID {farmer_id} not found.'}), 404
+
+        # CRITICAL: Delete all related records first (cascade delete)
+        # This handles Seasons, Stages, Uploads, IoT, etc., which are often related
+        # to the farmer via foreign keys.
+
+        # Example: Deleting Seasons (assuming a one-to-many relationship)
+          Season.query.filter_by(farmer_id=farmer_id).delete()
+
+        # Delete the main farmer record
+          db.session.delete(farmer)
+          db.session.commit()
+
+          return jsonify({'message': f'✅ Farmer {farmer_id} and all related data permanently deleted.'}), 200
+
+        except Exception as error:
+          db.session.rollback()
+        print(f"Error during farmer deletion: {error}", file=sys.stderr)
+        return jsonify({'message': 'Internal Server Error during deletion.', 'error_details': str(error)}), 500
 
 
 
@@ -866,7 +903,7 @@ def create_app(test_config=None):
             table_xai = Table(xai_data, colWidths=[350, 150])
             table_xai.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesoke),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
