@@ -1085,7 +1085,9 @@ const InsurerDashboard = ({ setView }) => {
     const [kpis, setKpis] = useState([]);
 
     const fetchInsurerFarmers = async () => { try { const response = await axios.get(`${API_BASE_URL}/api/insurer/farmers`); setFarmers(response.data); } catch (error) { console.error("Error fetching insurer-relevant farmers:", error); } };
-    
+
+    const [isLoading, setIsLoading] = useState(false);
+ 
     const fetchKpis = async () => {
         try {
             setIsLoading(true);
