@@ -828,6 +828,7 @@ const LenderDashboard = ({ setView }) => {
         try {
             setIsLoading(true);
             const { data } = await axios.get(`${API_BASE_URL}/api/lender/kpis`);
+            await new Promise(resolve => setTimeout(resolve, 500));
             const formattedKpis = [
                 { label: 'Total Loans Disbursed', value: data.total_loans_disbursed },
                 { label: 'Total Value of Loans', value: `$${data.total_value_disbursed.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
@@ -839,7 +840,6 @@ const LenderDashboard = ({ setView }) => {
         } catch (error) {
             console.error("Error fetching lender KPIs:", error);
         }finally{
-            await new Promise(resolve => setTimeout(resolve, 500));
             setIsLoading(false)
         }
     };
@@ -1093,6 +1093,7 @@ const InsurerDashboard = ({ setView }) => {
         try {
             setIsLoading(true);
             const { data } = await axios.get(`${API_BASE_URL}/api/insurer/kpis`);
+            await new Promise(resolve => setTimeout(resolve, 500));
             const formattedKpis = [
                 { label: 'Total Policies', value: data.total_policies },
                 { label: 'Total Value of Policies (Premiums)', value: `$${data.total_value_policies.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
@@ -1104,7 +1105,6 @@ const InsurerDashboard = ({ setView }) => {
         } catch (error) {
             console.error("Error fetching insurer KPIs:", error);
         }finally{
-            await new Promise(resolve => setTimeout(resolve, 500));
             setIsLoading(false);
                 }
         
