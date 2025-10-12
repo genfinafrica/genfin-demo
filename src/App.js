@@ -822,6 +822,8 @@ const LenderDashboard = ({ setView }) => {
         }
     };
 
+    const [isLoading, setIsLoading] = useState(false);
+ 
     const fetchKpis = async () => {
         try {
             const { data } = await axios.get(`${API_BASE_URL}/api/lender/kpis`);
@@ -838,6 +840,8 @@ const LenderDashboard = ({ setView }) => {
         }
     };
 
+    const [isLoading, setIsLoading] = useState(false);
+    
     const fetchFarmerDetails = async (id) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/api/farmer/${id}/status`);
@@ -945,14 +949,20 @@ const FieldOfficerDashboard = ({ setView }) => {
         }
     };
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const fetchKpis = async () => {
-        try {
-            const { data } = await axios.get(`${API_BASE_URL}/api/field-officer/kpis`);
-            setKpis(data);
-        } catch (error) {
-            console.error("Error fetching field officer KPIs:", error);
-        }
-    };
+    try {
+        setIsLoading(true); // START loading
+        const { data } = await axios.get(`${API_BASE_URL}/api/lender/kpis`);
+        setKpis(data);
+    } catch (error) {
+        console.error("Error fetching lender KPIs:", error);
+    } finally {
+        setIsLoading(false); // STOP loading
+    }
+};
+    
 
     const fetchFarmerDetails = async (id) => {
         try {
@@ -1009,7 +1019,13 @@ const FieldOfficerDashboard = ({ setView }) => {
                         ]} />
                         <BarChart title="Current Farmer Stage Distribution" data={kpis.stage_chart_base64} />
                     </>
-                ) : <p>Loading dashboard...</p>}
+                ) : isLoading ? (
+    // RENDER SPINNER WHEN LOADING
+    <p>Loading KPIs... <span className="spinner"></span></p> 
+) : (
+    // RENDER FAILED MESSAGE WHEN NOT LOADING AND NO DATA
+    <p>Could not load dashboard data.</p>
+)}
                 <h3 style={{marginTop: '30px'}}>Farmer List</h3>
                 <p>Select a farmer to view milestones and approve stages.</p>
                 {farmers.map((farmer) => (
