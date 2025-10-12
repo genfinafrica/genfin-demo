@@ -952,7 +952,7 @@ const FieldOfficerDashboard = ({ setView }) => {
     const fetchKpis = async () => {
     try {
         setIsLoading(true); // START loading
-        const { data } = await axios.get(`${API_BASE_URL}/api/lender/kpis`);
+        const { data } = await axios.get(`${API_BASE_URL}/api/field-officer/kpis`);
         setKpis(data);
     } catch (error) {
         console.error("Error fetching lender KPIs:", error);
