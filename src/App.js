@@ -882,12 +882,13 @@ const LenderDashboard = ({ setView }) => {
             <div className="dashboard-list-container">
                 <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Lender/Admin Dashboard</h2>
+               {kpis ? (
                 <KpiGrid kpis={kpis} />
                 ) : isLoading ? (
                 <p>Loading KPIs... <span className="spinner"></span></p> 
                 ) : (
                 <p>Could not load dashboard data.</p>
-                )
+                )}
                 <h3 style={{marginTop: '30px'}}>Farmer Portfolio</h3>
                 <p>Select a farmer to view progress and disburse funds.</p>
                 {farmers.map((farmer) => (
@@ -1128,12 +1129,13 @@ const InsurerDashboard = ({ setView }) => {
             <div className="dashboard-list-container">
                 <button className="btn-back" onClick={() => setView('welcome')}>← Back to Roles</button>
                 <h2>Insurer Dashboard</h2>
+               {kpis ? ( 
                 <KpiGrid kpis={kpis} />
                 ) : isLoading ? (
                 <p>Loading KPIs... <span className="spinner"></span></p> 
                 ) : (
                 <p>Could not load dashboard data.</p>
-                )
+                )}
                 <h3 style={{marginTop: '30px'}}>Policy Holder List</h3>
                 <p>Select a farmer to view and manage their insurance policy.</p>
                 {farmers.map((farmer) => (
