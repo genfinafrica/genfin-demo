@@ -295,7 +295,7 @@ button:hover,
 }
 
 .role-buttons button {
-  min-width: 200px; /* or any fixed width you prefer */
+  min-width: 200px; 
   flex: 1 1 200px;
   text-align: center;
   }
