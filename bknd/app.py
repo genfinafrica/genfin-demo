@@ -766,7 +766,7 @@ def create_app(test_config=None):
         total_claims = Policy.query.filter(Policy.status.in_(['CLAIM_APPROVED', 'CLAIMED'])).count()
 
         # *** MODIFIED LOGIC ***
-        # Simulate claim value: 70% of the total potential loan for each approved claim, representing a more realistic payout.
+        # Simulate claim value: 10% of the total potential loan for each approved claim, representing a more realistic payout.
         # The total potential loan acts as the "sum insured".
         approved_claim_seasons = [p.season_id for p in Policy.query.filter(Policy.status.in_(['CLAIM_APPROVED', 'CLAIMED'])).all()]
         total_value_claims = 0
@@ -828,7 +828,7 @@ def create_app(test_config=None):
         base64_img = base64.b64encode(buf.read()).decode('utf-8')
         plt.close(fig)  # Clean up
 
-        # Add to response
+
         return jsonify({
         'num_farmers': num_farmers,
         'pending_approvals': pending_approvals,
@@ -836,7 +836,7 @@ def create_app(test_config=None):
         'stage_chart_base64': base64_img  # New key
     })
 
-    # Add this new function to your App.py file
+
 
     @app.route('/api/admin/delete_farmer/<int:farmer_id>', methods=['DELETE'])
     def delete_farmer(farmer_id):
