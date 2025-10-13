@@ -85,7 +85,7 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
             <h4>Farmer Tracker: {farmer.name} (ID: {farmer.farmer_id})</h4>
             <div className="farmer-status-summary" style={{ display: 'flex', justifyContent: 'space-around', margin: '20px 0' }}>
                 
-                {/* --- VALID FIX: INSERT TOTAL DISBURSED HERE --- */}
+                
                 <div style={{ padding: '10px', borderRight: '1px solid #ddd' }}>
                     <strong>Total Disbursed Amount: ${totalDisbursed.toFixed(2)}</strong>
                     <br />
@@ -94,7 +94,7 @@ const FarmerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, cont
                         View Contract
                     </button>
                 </div>
-                {/* ------------------------------------------- */}
+                
                 
                 <div style={{ padding: '10px' }}>
                     <strong>Score: {score}</strong> <br />
@@ -219,7 +219,7 @@ const InsurerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, con
             <Modal show={showXaiModal} onClose={() => setShowXaiModal(false)} title="AI Proficiency Score (XAI) - Insurer View">
                 <p><strong>Score: {score}</strong> | Risk Band: {risk}</p>
                 <p>Explanation of the current score based on factors relevant to insurance underwriting:</p>
-                {/* 3. This is the FIX: Use the original table structure with the filtered data */}
+                
                 <table>
                     <thead>
                         <tr>
@@ -244,7 +244,7 @@ const InsurerDetailsCard = ({ farmer, score, risk, xaiFactors, contractHash, con
 
 // --- NEW FAQ SECTION COMPONENT (Content Block) ---
 const FaqSection = () => {
-    // The image you provided will be displayed using its file name/path
+    
      
 
     return (
@@ -280,7 +280,7 @@ const FaqSection = () => {
     <strong>A:</strong> The demo is driven by user roles, simulating a full crop cycle across multiple stages:
 </p>
 
-{/* CRITICAL FIX: Replace the old paragraph with an Ordered List (<ol>) */}
+
 <ol style={{ paddingLeft: '25px', marginTop: '10px' }}>
     <li>
         <strong>Start (Farmer Chatbot Mock):</strong> Simulate initial onboarding.
@@ -787,7 +787,7 @@ const FaqDashboard = ({ setView }) => (
                 </a>
             </div>
 
-            {/* 2. Embedded YouTube Video (Replaced with placeholder) */}
+            {/* 2. Embedded YouTube Video */}
             <h3 style={{ marginBottom: '10px' }}>Demo Presentation</h3>
             <div className="video-container" style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', height: 0, overflow: 'hidden', maxWidth: '800px' }}>                
                 <iframe
@@ -1169,7 +1169,7 @@ const InsurerDashboard = ({ setView }) => {
                     <button className="btn-insurer" onClick={() => handleReview('REJECT')}>Reject Claim</button>
                 </div>
             )}
-            {/* 4. This is the final change: Call the new restricted-view card */}
+            {/* Call the new restricted-view card */}
             <InsurerDetailsCard
                 farmer={farmerData}
                 score={farmerData.current_status.score}
