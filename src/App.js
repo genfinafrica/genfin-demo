@@ -651,6 +651,16 @@ const FarmerChatbotMock = ({ setView }) => {
         const command = userText.toUpperCase();
         pushUserMessage(userText);
         setInput('');
+
+        if (command === 'RESET') {
+        setChatState('AWAITING_COMMAND');
+        setFarmerId(null);
+        setRegistrationData({});
+        setFarmerStatus(null);
+        pushBotMessage("Chat reset. Type **REGISTER** or **STATUS**.");
+        return; // Stop further processing
+    }
+                      
         if (showUploadInput) { await handleFileUpload(userText); return; }
         if (showIoTInput) { await handleIotData(userText); return; }
         if (chatState.startsWith('REG_')) { await handleRegistrationSteps(userText); return; }
