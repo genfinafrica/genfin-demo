@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
-// import { Analytics } from "@vercel/analytics/next"
 
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000';
@@ -661,7 +660,7 @@ const FarmerChatbotMock = ({ setView }) => {
         pushBotMessage("Chat reset. Type **REGISTER** or **STATUS**.");
         return; // Stop further processing
     }
-                      
+        
         if (showUploadInput) { await handleFileUpload(userText); return; }
         if (showIoTInput) { await handleIotData(userText); return; }
         if (chatState.startsWith('REG_')) { await handleRegistrationSteps(userText); return; }
@@ -1224,7 +1223,6 @@ const App = () => {
             {view === 'fieldOfficer' && <FieldOfficerDashboard setView={setView} />}
             {view === 'insurer' && <InsurerDashboard setView={setView} />} 
             {view === 'faq' && <FaqDashboard setView={setView} />}
-            //  <Analytics />
         </div>
     );
 };
