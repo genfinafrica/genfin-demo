@@ -1224,7 +1224,7 @@ const App = () => {
             {view === 'fieldOfficer' && <FieldOfficerDashboard setView={setView} />}
             {view === 'insurer' && <InsurerDashboard setView={setView} />} 
             {view === 'faq' && <FaqDashboard setView={setView} />}
-             <Analytics />
+            //  <Analytics />
         </div>
     );
 };
