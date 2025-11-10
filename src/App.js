@@ -871,17 +871,25 @@ const LenderDashboard = ({ setView }) => {
     };
     
     const handleDisburse = async (stageNumber) => {
-        if (!farmerData) return;
-        try {
-            await axios.post(`${API_BASE_URL}/api/lender/disburse/${selectedFarmerId}/${stageNumber}`);
-            alert(response.data.message);
-            await fetchFarmerDetails(selectedFarmerId);
-            await fetchFarmers(); // Refresh list to update summary data
-            await fetchKpis(); // Refresh KPIs after disbursement
-        } catch (error) {
-            alert(error.response?.data?.message || "Disbursement failed.");
-        }
-    };
+    if (!farmerData) return;
+
+    try {
+        const { data } = await axios.post(
+            `${API_BASE_URL}/api/lender/disburse/${selectedFarmerId}/${stageNumber}`
+        );
+
+        alert(data.message);
+
+        // Now refresh UI properly
+        await fetchFarmerDetails(selectedFarmerId);
+        await fetchFarmers();
+        await fetchKpis();
+
+    } catch (error) {
+        alert(error.response?.data?.message || "Disbursement failed.");
+        console.error("Disbursement error:", error);
+    }
+};
 
     useEffect(() => {
         fetchFarmers();
